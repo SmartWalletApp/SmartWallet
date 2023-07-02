@@ -5,6 +5,9 @@ namespace ExchangeManager.Data
 {
     public class ExchangeManagerDbContext : DbContext
     {
+        public ExchangeManagerDbContext(DbContextOptions<ExchangeManagerDbContext> options) : base(options)
+        {
+        }
 
         // Customer will contain all other relations.
         public DbSet<Customer> Customers { get; set; }
@@ -15,7 +18,7 @@ namespace ExchangeManager.Data
             {
                 entity.HasKey(c => c.Id);
                 entity.Property(c => c.Id).ValueGeneratedOnAdd();
-                entity.Property(c => c.CreationDate).HasDefaultValueSql("getdate()");
+                entity.Property(b => b.CreationDate).HasDefaultValueSql("CURRENT_TIMESTAMP");
             });
 
             modelBuilder.Entity<Wallet>(entity =>
@@ -29,7 +32,8 @@ namespace ExchangeManager.Data
             {
                 entity.HasKey(b => b.Id);
                 entity.Property(b => b.Id).ValueGeneratedOnAdd();
-                entity.Property(b => b.Date).HasDefaultValueSql("getdate()");
+                entity.Property(b => b.Date).HasDefaultValueSql("CURRENT_TIMESTAMP");
+
             });
 
             modelBuilder.Entity<Coin>(entity =>

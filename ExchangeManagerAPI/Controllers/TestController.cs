@@ -1,4 +1,6 @@
-﻿using ExchangeManager.Data;
+﻿using ExchangeManager.DomainModel.RepositoryContracts;
+using ExchangeManager.Infrastructure.DataModels;
+using ExchangeManager.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,19 +11,32 @@ namespace ExchangeManagerAPI.Controllers
     [Route("[controller]")]
     public class TestController : ControllerBase
     {
-        private readonly ExchangeManagerDbContext _dbContext;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public TestController(ExchangeManagerDbContext dbContext)
+        public TestController(IUnitOfWork unitOfWork)
         {
-            _dbContext = dbContext;
+            _unitOfWork = unitOfWork;
         }
 
+        [HttpGet(Name = "GetAllCoins")]
+        public Task<IEnumerable<Customer>> GetAllCoins()
+        {
+            ((UnitOfWork)_unitOfWork).CustomerRepository.Insert(new Customer
+            {
+                Email= "eduarqué@gmail.com",
+                Name = "Eduardo",
+                Surname = "Arqué",
+                Password = "1234",
+            });
+            return ((UnitOfWork)_unitOfWork).CustomerRepository.GetAll();
+        }
 
         [HttpDelete]
         public IActionResult RestoreDB()
         {
-            _dbContext.Database.EnsureDeleted();
-            _dbContext.Database.EnsureCreated();
+            _unitOfWork.EnsureDeleted();
+            _unitOfWork.EnsureCreated();
+            _unitOfWork.SetCoins();
             return Ok($"Restored successfully");
         }
     }

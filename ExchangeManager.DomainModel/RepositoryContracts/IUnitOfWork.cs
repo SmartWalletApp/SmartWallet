@@ -6,8 +6,11 @@ using System.Threading.Tasks;
 
 namespace ExchangeManager.DomainModel.RepositoryContracts
 {
-    internal interface IUnitOfWork
+    public interface IUnitOfWork
     {
-
+        void Save();
+        void EnsureDeleted();
+        void EnsureCreated();
+        void SetCoins();
     }
 }

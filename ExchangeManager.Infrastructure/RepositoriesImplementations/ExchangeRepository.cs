@@ -1,5 +1,5 @@
-﻿using ExchangeManager.Data;
-using ExchangeManager.DomainModel.RepositoryContracts;
+﻿using ExchangeManager.DomainModel.RepositoryContracts;
+using ExchangeManager.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 namespace ExchangeManager.Infrastructure.Repositories
@@ -33,7 +33,7 @@ namespace ExchangeManager.Infrastructure.Repositories
 
         public async Task<T> Insert(T entity)
         {
-            EntitySet.AddAsync(entity);
+            await EntitySet.AddAsync(entity);
             await Save();
             return entity;
         }
@@ -53,28 +53,29 @@ namespace ExchangeManager.Infrastructure.Repositories
             await Save();
         }
 
-        public async Task Save()
+        public Task Save()
         {
-            context.SaveChangesAsync();
+            var rowsModified = context.SaveChanges();
+            return rowsModified > 0 ? Task.CompletedTask : throw new Exception("No changes were made.");
         }
 
         private bool disposed = false;
 
-        protected virtual void Dispose(bool disposing)
+        protected virtual void DisposeAsync(bool disposing)
         {
-            if (!this.disposed)
+            if (!disposed)
             {
                 if (disposing)
                 {
-                    context.Dispose();
+                    context.DisposeAsync();
                 }
             }
-            this.disposed = true;
+            disposed = true;
         }
 
-        public void Dispose()
+        public async void Dispose()
         {
-            Dispose(true);
+            DisposeAsync(true);
             GC.SuppressFinalize(this);
         }
     }

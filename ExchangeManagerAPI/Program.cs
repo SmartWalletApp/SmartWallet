@@ -1,5 +1,5 @@
 using ExchangeManager.ApplicationService.Extension;
-using ExchangeManager.Data;
+using ExchangeManager.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);

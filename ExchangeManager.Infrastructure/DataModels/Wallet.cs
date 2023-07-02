@@ -12,6 +12,5 @@ namespace ExchangeManager.Infrastructure.DataModels
         public decimal Balance { get; set; }
         public Coin Coin { get; set; }
         public List<BalanceHistory> BalanceHistory { get; set; }
-        public Customer Customer { get; set; }
     }
 }

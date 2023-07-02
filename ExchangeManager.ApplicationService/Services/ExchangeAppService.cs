@@ -1,6 +1,8 @@
-﻿namespace ExchangeManager.ApplicationService.Services
+﻿using ExchangeManager.ApplicationService.Contracts;
+
+namespace ExchangeManager.ApplicationService.Services
 {
-    public class ExchangeAppService
+    public class ExchangeAppService : IExchangeAppService
     {
 
     }

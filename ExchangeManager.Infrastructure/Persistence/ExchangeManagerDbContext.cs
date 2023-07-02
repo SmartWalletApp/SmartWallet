@@ -58,7 +58,6 @@ namespace ExchangeManager.Infrastructure.Persistence
                 entity.HasKey(c => c.Id);
                 entity.Property(c => c.Id).ValueGeneratedOnAdd();
                 entity.Property(b => b.CreationDate).HasDefaultValueSql("CURRENT_TIMESTAMP");
-                entity.OnDelete(DeleteBehavior.Cascade); ;
             });
 
             modelBuilder.Entity<Wallet>(entity =>

@@ -12,8 +12,6 @@ namespace ExchangeManager.DomainModel.RepositoryContracts
         Task<T> GetByID(int Id);
         Task<T> Insert(T entity);
         Task<T> Delete(int ID);
-        Task Update(T entity);
-        //void Save();
     }
 
 }

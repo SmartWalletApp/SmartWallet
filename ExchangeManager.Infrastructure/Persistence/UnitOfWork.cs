@@ -46,34 +46,14 @@ namespace ExchangeManager.Infrastructure.Persistence
             _context.Database.EnsureCreated();
         }
 
-        public void SetCoins()
+        public void SetDefaultCoin()
         {
             CoinRepository.Insert(new Coin
             {
-                Name = "Euro",
+                Name = "DEFAULT/COIN",
                 SellValue = 1,
                 BuyValue = 1
             });
-            CoinRepository.Insert(new Coin
-            {
-                Name = "Dollar",
-                SellValue = 1.2m,
-                BuyValue = 0.8m
-            });
-            CoinRepository.Insert(new Coin
-            {
-                Name = "Bitcoin",
-                SellValue = 20000m,
-                BuyValue = 22000m
-            });
-            CoinRepository.Insert(new Coin
-            {
-                Name = "DogeCoin",
-                SellValue = 0.000003m,
-                BuyValue = 0.0000013m
-            });
         }
-
-
     }
 }

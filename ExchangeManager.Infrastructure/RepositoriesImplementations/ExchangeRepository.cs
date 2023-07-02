@@ -12,13 +12,7 @@ namespace ExchangeManager.Infrastructure.Repositories
         {
             this.context = context;
         }
-        protected DbSet<T> EntitySet
-        {
-            get
-            {
-                return context.Set<T>();
-            }
-        }
+        protected DbSet<T> EntitySet { get { return context.Set<T>(); } }
 
 
         public async Task<IEnumerable<T>> GetAll()
@@ -44,13 +38,6 @@ namespace ExchangeManager.Infrastructure.Repositories
             EntitySet.Remove(entity);
             await Save();
             return entity;
-
-        }
-
-        public async Task Update(T entity)
-        {
-            EntitySet.Entry(entity).State = EntityState.Modified;
-            await Save();
         }
 
         public Task Save()

@@ -3,6 +3,7 @@ using ExchangeManager.Infrastructure.DataModels;
 using ExchangeManager.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace ExchangeManagerAPI.Controllers
 {
@@ -18,25 +19,36 @@ namespace ExchangeManagerAPI.Controllers
             _unitOfWork = unitOfWork;
         }
 
-        [HttpGet(Name = "GetAllCoins")]
-        public Task<IEnumerable<Customer>> GetAllCoins()
+        [HttpGet(Name = "GetCustomers")]
+        public async Task<IEnumerable<Customer>> GetCustomers()
         {
-            ((UnitOfWork)_unitOfWork).CustomerRepository.Insert(new Customer
-            {
-                Email= "eduarqué@gmail.com",
-                Name = "Eduardo",
-                Surname = "Arqué",
-                Password = "1234",
-            });
-            return ((UnitOfWork)_unitOfWork).CustomerRepository.GetAll();
+            return await ((UnitOfWork)_unitOfWork).CustomerRepository.GetAll();
         }
 
-        [HttpDelete]
+        [HttpGet("{id}", Name = "GetCustomer")]
+        public async Task<Customer> GetCustomer(int id)
+        {
+            return await ((UnitOfWork)_unitOfWork).CustomerRepository.GetByID(id);
+        }
+
+        [HttpPost(Name = "InsertCustomer")]
+        public async Task<ActionResult<Customer>> PostStudent(Customer customer)
+        {
+            return Ok(await ((UnitOfWork)_unitOfWork).CustomerRepository.Insert(customer));
+        }
+
+        [HttpDelete("{id}", Name = "DeleteCustomer")]
+        public async Task<IActionResult> DeleteCustomer(int id)
+        {
+            return Ok(await ((UnitOfWork)_unitOfWork).CustomerRepository.Delete(id));
+        }
+
+        [HttpDelete(Name = "RestoreDB")]
         public IActionResult RestoreDB()
         {
             _unitOfWork.EnsureDeleted();
             _unitOfWork.EnsureCreated();
-            _unitOfWork.SetCoins();
+            _unitOfWork.SetDefaultCoin();
             return Ok($"Restored successfully");
         }
     }

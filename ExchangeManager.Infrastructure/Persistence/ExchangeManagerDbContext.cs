@@ -19,40 +19,36 @@ namespace ExchangeManager.Infrastructure.Persistence
 
         public override int SaveChanges()
         {
+            // If a new Customer has been added, add one wallet per each coin.
             var addedCustomerEntry = ChangeTracker.Entries<Customer>()
                 .FirstOrDefault(entry => entry.State == EntityState.Added);
 
             if (addedCustomerEntry != null)
+                return CreateWalletForNewCustomer(addedCustomerEntry.Entity);
+            else
+                return base.SaveChanges();
+        }
+
+        private int CreateWalletForNewCustomer(Customer customer)
+        {
+            using (var transaction = Database.BeginTransaction())
             {
-                using (var transaction = Database.BeginTransaction()){
-                    try
-                    {
-                        int result = base.SaveChanges();
+                int result = base.SaveChanges();
 
-                        var addedCustomer = addedCustomerEntry.Entity;
-
-                        var coins = Coin.ToList();
-
-                        foreach (var coin in coins)
-                        {
-                            addedCustomer.Wallets.Add
-                            (
-                                new Wallet { Coin = coin}
-                            );
-                        }
-
-                        base.SaveChanges();
-                        transaction.Commit();
-
-                        return result;
-                    }
-                    catch (Exception ex)
-                    {
-                        transaction.Rollback();
-                    }
+                var coins = Coin.ToList();
+                foreach (var coin in coins)
+                {
+                    customer.Wallets.Add
+                    (
+                        new Wallet { Coin = coin }
+                    );
                 }
+
+                base.SaveChanges();
+                transaction.Commit();
+
+                return result;
             }
-            return base.SaveChanges();
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -62,6 +58,7 @@ namespace ExchangeManager.Infrastructure.Persistence
                 entity.HasKey(c => c.Id);
                 entity.Property(c => c.Id).ValueGeneratedOnAdd();
                 entity.Property(b => b.CreationDate).HasDefaultValueSql("CURRENT_TIMESTAMP");
+                entity.OnDelete(DeleteBehavior.Cascade); ;
             });
 
             modelBuilder.Entity<Wallet>(entity =>
@@ -76,7 +73,6 @@ namespace ExchangeManager.Infrastructure.Persistence
                 entity.HasKey(b => b.Id);
                 entity.Property(b => b.Id).ValueGeneratedOnAdd();
                 entity.Property(b => b.Date).HasDefaultValueSql("CURRENT_TIMESTAMP");
-
             });
 
             modelBuilder.Entity<Coin>(entity =>

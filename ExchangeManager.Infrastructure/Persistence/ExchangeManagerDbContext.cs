@@ -5,6 +5,8 @@ namespace ExchangeManager.Data
 {
     public class ExchangeManagerDbContext : DbContext
     {
+
+        // Customer will contain all other relations.
         public DbSet<Customer> Customers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

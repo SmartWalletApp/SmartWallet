@@ -1,6 +1,7 @@
 ﻿using ExchangeManager.ApplicationService.Contracts;
 using ExchangeManager.ApplicationService.Services;
 using ExchangeManager.DomainModel.RepositoryContracts;
+using ExchangeManager.Infrastructure.DataModels;
 using ExchangeManager.Infrastructure.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -16,7 +17,7 @@ namespace ExchangeManager.ApplicationService.Extension
         public static IServiceCollection AddApplicationServices(this IServiceCollection services)
         {
             services.AddScoped<IExchangeAppService, ExchangeAppService>();
-            services.AddScoped<IExchangeRepository, ExchangeRepository>();
+            services.AddScoped<IExchangeRepository<Coin>, ExchangeRepository<Coin>>();
             return services;
         }
     }

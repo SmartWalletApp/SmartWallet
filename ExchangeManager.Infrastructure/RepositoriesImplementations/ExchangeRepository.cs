@@ -40,6 +40,13 @@ namespace ExchangeManager.Infrastructure.Repositories
             return entity;
         }
 
+        public async Task<T> Update(T entity)
+        {
+            EntitySet.Update(entity);
+            await Save();
+            return entity;
+        }
+
         public Task Save()
         {
             var rowsModified = context.SaveChanges();

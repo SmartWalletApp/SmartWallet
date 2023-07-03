@@ -43,7 +43,13 @@ namespace ExchangeManagerAPI.Controllers
             return Ok(await ((UnitOfWork)_unitOfWork).CustomerRepository.Delete(id));
         }
 
-        # if DEBUG
+        [HttpPut(Name = "UpdateStudent")]
+        public async Task<ActionResult<Customer>> UpdateStudent([FromBody] Customer newCustomer)
+        {
+            return Ok(await ((UnitOfWork)_unitOfWork).CustomerRepository.Update(newCustomer));
+        }
+
+#if DEBUG
         [HttpDelete(Name = "RestoreDB")]
         public IActionResult RestoreDB()
         {

@@ -15,6 +15,6 @@ namespace ExchangeManager.Infrastructure.DataModels
         public string Password { get; set; }
         public bool IsActive { get; set; }
         public DateTime CreationDate { get; set; }
-        public List<Wallet> Wallets { get; set; } = new List<Wallet>();
+        public List<Wallet>? Wallets { get; set; }
     }
 }

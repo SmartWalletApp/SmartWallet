@@ -45,15 +45,5 @@ namespace ExchangeManager.Infrastructure.Persistence
         {
             _context.Database.EnsureCreated();
         }
-
-        public void SetDefaultCoin()
-        {
-            CoinRepository.Insert(new Coin
-            {
-                Name = "DEFAULT/COIN",
-                SellValue = 1,
-                BuyValue = 1
-            });
-        }
     }
 }

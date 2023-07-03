@@ -32,7 +32,7 @@ namespace ExchangeManagerAPI.Controllers
         }
 
         [HttpPost(Name = "InsertCustomer")]
-        public async Task<ActionResult<Customer>> PostStudent(Customer customer)
+        public async Task<ActionResult<Customer>> PostCustomer(Customer customer)
         {
             return Ok(await ((UnitOfWork)_unitOfWork).CustomerRepository.Insert(customer));
         }
@@ -49,7 +49,7 @@ namespace ExchangeManagerAPI.Controllers
         {
             _unitOfWork.EnsureDeleted();
             _unitOfWork.EnsureCreated();
-            _unitOfWork.SetDefaultCoin();
+            //_unitOfWork.SetDefaultCoin();
             return Ok($"Restored successfully");
         }
         # endif

@@ -11,6 +11,5 @@ namespace ExchangeManager.DomainModel.RepositoryContracts
         void Save();
         void EnsureDeleted();
         void EnsureCreated();
-        void SetDefaultCoin();
     }
 }

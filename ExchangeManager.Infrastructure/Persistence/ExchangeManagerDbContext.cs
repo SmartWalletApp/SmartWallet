@@ -32,21 +32,24 @@ namespace ExchangeManager.Infrastructure.Persistence
         {
             using (var transaction = Database.BeginTransaction())
             {
-                int result = base.SaveChanges();
-
+                customer.Wallets = new List<Wallet>();
                 var coins = Coin.ToList();
                 foreach (var coin in coins)
                 {
                     customer.Wallets.Add
                     (
-                        new Wallet { Coin = coin }
+                        new Wallet
+                        {
+                            Coin = coin,
+                            Balance = 0,
+                            BalanceHistory = new List<BalanceHistory>()
+                        }
                     );
                 }
 
-                base.SaveChanges();
+                var modifiedRows = base.SaveChanges();
                 transaction.Commit();
-
-                return result;
+                return modifiedRows;
             }
         }
 
@@ -62,7 +65,13 @@ namespace ExchangeManager.Infrastructure.Persistence
                 entity.Property(b => b.Password).IsRequired();
                 entity.Property(b => b.IsActive).IsRequired();
                 entity.Property(b => b.CreationDate).IsRequired();
-                entity.Property(b => b.Wallets).IsRequired();
+                //entity.Property(b => b.Wallets).IsRequired(); // Objects cannot be obligatory
+
+                entity.HasMany(c => c.Wallets) // One customer has many wallets
+                .WithOne() // Each wallet has one customer
+                .HasForeignKey("CustomerId")
+                .OnDelete(DeleteBehavior.Cascade);
+
             });
 
             modelBuilder.Entity<Wallet>(entity =>
@@ -70,8 +79,16 @@ namespace ExchangeManager.Infrastructure.Persistence
                 entity.HasKey(w => w.Id);
                 entity.Property(w => w.Id).ValueGeneratedOnAdd();
                 entity.Property(w => w.Balance).IsRequired();
-                entity.Property(w => w.Coin).IsRequired();
-                entity.Property(w => w.BalanceHistory).IsRequired();
+                //entity.Property(w => w.Coin).IsRequired(); // Objects cannot be obligatory
+                //entity.Property(w => w.BalanceHistory).IsRequired(); // Objects cannot be obligatory
+
+                entity.HasOne(w => w.Coin);
+
+                entity.HasMany(w => w.BalanceHistory) // One wallet has many BalanceHistories
+                    .WithOne() // Each BalanceHistory has one Wallet
+                    .HasForeignKey("WalletId")
+                    .OnDelete(DeleteBehavior.Cascade);
+
             });
 
             modelBuilder.Entity<BalanceHistory>(entity =>

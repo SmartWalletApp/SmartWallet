@@ -11,7 +11,6 @@ namespace ExchangeManager.Infrastructure.Persistence
         {
         }
 
-        // Customer will contain all other relations.
         public DbSet<Customer> Customers { get; set; }
         public DbSet<Coin> Coin { get; set; }
         public DbSet<Wallet> Wallet { get; set; }
@@ -57,7 +56,13 @@ namespace ExchangeManager.Infrastructure.Persistence
             {
                 entity.HasKey(c => c.Id);
                 entity.Property(c => c.Id).ValueGeneratedOnAdd();
-                entity.Property(b => b.CreationDate).HasDefaultValueSql("CURRENT_TIMESTAMP");
+                entity.Property(b => b.Name).HasDefaultValue("Default");
+                entity.Property(b => b.Surname).HasDefaultValue("Default");
+                entity.Property(b => b.Email).HasDefaultValue("Default");
+                entity.Property(b => b.Password).HasDefaultValue("Default");
+                entity.Property(b => b.IsActive).HasDefaultValue(false);
+                entity.Property(b => b.CreationDate).HasDefaultValue(DateTime.Now);
+                entity.Property(b => b.Wallets).HasDefaultValue(new List<Wallet>());
             });
 
             modelBuilder.Entity<Wallet>(entity =>
@@ -65,19 +70,27 @@ namespace ExchangeManager.Infrastructure.Persistence
                 entity.HasKey(w => w.Id);
                 entity.Property(w => w.Id).ValueGeneratedOnAdd();
                 entity.Property(w => w.Balance).HasDefaultValue(0);
+                entity.Property(w => w.Coin).HasDefaultValue(new Coin { Name = "Default" });
+                entity.Property(w => w.BalanceHistory).HasDefaultValue(new List<BalanceHistory>());
             });
 
             modelBuilder.Entity<BalanceHistory>(entity =>
             {
                 entity.HasKey(b => b.Id);
                 entity.Property(b => b.Id).ValueGeneratedOnAdd();
-                entity.Property(b => b.Date).HasDefaultValueSql("CURRENT_TIMESTAMP");
+                entity.Property(b => b.Variation).HasDefaultValue(0m);
+                entity.Property(b => b.Category).HasDefaultValue("Default");
+                entity.Property(b => b.Date).HasDefaultValue(DateTime.Now);
+                entity.Property(b => b.Description).HasDefaultValue("Default");
             });
 
             modelBuilder.Entity<Coin>(entity =>
             {
                 entity.HasKey(c => c.Id);
                 entity.Property(c => c.Id).ValueGeneratedOnAdd();
+                entity.Property(b => b.Name).HasDefaultValue("Default");
+                entity.Property(b => b.BuyValue).HasDefaultValue(1m);
+                entity.Property(b => b.SellValue).HasDefaultValue(1m);
             });
         }
 

@@ -43,6 +43,7 @@ namespace ExchangeManagerAPI.Controllers
             return Ok(await ((UnitOfWork)_unitOfWork).CustomerRepository.Delete(id));
         }
 
+        # if DEBUG
         [HttpDelete(Name = "RestoreDB")]
         public IActionResult RestoreDB()
         {
@@ -51,5 +52,7 @@ namespace ExchangeManagerAPI.Controllers
             _unitOfWork.SetDefaultCoin();
             return Ok($"Restored successfully");
         }
+        # endif
+
     }
 }

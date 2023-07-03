@@ -2,8 +2,6 @@
 using ExchangeManager.Infrastructure.DataModels;
 using ExchangeManager.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace ExchangeManagerAPI.Controllers
 {

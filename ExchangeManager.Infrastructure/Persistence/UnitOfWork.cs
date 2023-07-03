@@ -1,11 +1,5 @@
 ﻿using ExchangeManager.DomainModel.RepositoryContracts;
 using ExchangeManager.Infrastructure.DataModels;
-using ExchangeManager.Infrastructure.Repositories;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ExchangeManager.Infrastructure.Persistence
 {

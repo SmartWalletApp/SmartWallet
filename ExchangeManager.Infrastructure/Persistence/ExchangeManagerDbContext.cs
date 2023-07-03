@@ -1,7 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ExchangeManager.Infrastructure.DataModels;
-using ExchangeManager.DomainModel.RepositoryContracts;
-using Microsoft.Extensions.Logging;
 
 namespace ExchangeManager.Infrastructure.Persistence
 {
@@ -64,7 +62,7 @@ namespace ExchangeManager.Infrastructure.Persistence
                 entity.Property(b => b.Email).IsRequired();
                 entity.Property(b => b.Password).IsRequired();
                 entity.Property(b => b.IsActive).IsRequired();
-                entity.Property(b => b.CreationDate).IsRequired();
+                entity.Property(b => b.CreationDate).HasDefaultValueSql("CURRENT_TIMESTAMP");
                 //entity.Property(b => b.Wallets).IsRequired(); // Objects cannot be obligatory
 
                 entity.HasMany(c => c.Wallets) // One customer has many wallets

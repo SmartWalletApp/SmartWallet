@@ -10,11 +10,11 @@ namespace ExchangeManagerAPI.Controllers
 
     [ApiController]
     [Route("[controller]")]
-    public class TestController : ControllerBase
+    public class EndpointController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
 
-        public TestController(IUnitOfWork unitOfWork)
+        public EndpointController(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
         }

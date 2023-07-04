@@ -4,16 +4,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ExchangeManager.Infrastructure.Repositories
 {
-    public class ExchangeRepository<T> : IExchangeRepository<T> where T : class
+    public class ExchangeRepository<T> : IExchangeRepository<T>, IAsyncDisposable where T : class
     {
-        private readonly ExchangeManagerDbContext context;
+        private readonly ExchangeManagerDbContext _context;
 
         public ExchangeRepository(ExchangeManagerDbContext context)
         {
-            this.context = context;
+            _context = context;
         }
-        protected DbSet<T> EntitySet { get { return context.Set<T>(); } }
-
+        protected DbSet<T> EntitySet { get { return _context.Set<T>(); } }
 
         public async Task<IEnumerable<T>> GetAll()
         {
@@ -27,49 +26,48 @@ namespace ExchangeManager.Infrastructure.Repositories
 
         public async Task<T> Insert(T entity)
         {
+            if (entity == null)
+            {
+                throw new ArgumentNullException(nameof(entity));
+            }
+
             await EntitySet.AddAsync(entity);
-            await Save();
             return entity;
         }
 
         public async Task<T> Delete(int ID)
         {
             T entity = await EntitySet.FindAsync(ID);
+
+            if (entity == null)
+            {
+                throw new ArgumentNullException(nameof(entity));
+            }
+
             EntitySet.Remove(entity);
-            await Save();
             return entity;
         }
 
         public async Task<T> Update(T entity)
         {
+            if (entity == null)
+            {
+                throw new ArgumentNullException(nameof(entity));
+            }
+
             EntitySet.Update(entity);
-            await Save();
             return entity;
         }
 
-        public Task Save()
+        public void Dispose()
         {
-            var rowsModified = context.SaveChanges();
-            return rowsModified > 0 ? Task.CompletedTask : throw new Exception("No changes were made.");
+            _context.Dispose();
+            GC.SuppressFinalize(this);
         }
 
-        private bool disposed = false;
-
-        protected virtual void DisposeAsync(bool disposing)
+        public async ValueTask DisposeAsync()
         {
-            if (!disposed)
-            {
-                if (disposing)
-                {
-                    context.DisposeAsync();
-                }
-            }
-            disposed = true;
-        }
-
-        public async void Dispose()
-        {
-            DisposeAsync(true);
+            await _context.DisposeAsync();
             GC.SuppressFinalize(this);
         }
     }

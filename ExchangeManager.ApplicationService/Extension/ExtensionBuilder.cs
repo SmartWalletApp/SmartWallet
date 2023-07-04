@@ -1,7 +1,7 @@
 ﻿using ExchangeManager.ApplicationService.Contracts;
 using ExchangeManager.ApplicationService.Services;
 using ExchangeManager.DomainModel.RepositoryContracts;
-using ExchangeManager.Infrastructure.DataModels;
+using ExchangeManager.DomainModel.DataModels;
 using ExchangeManager.Infrastructure.Persistence;
 using ExchangeManager.Infrastructure.Repositories;
 using Microsoft.Extensions.DependencyInjection;

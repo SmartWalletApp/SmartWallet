@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using ExchangeManager.DomainModel.DataModels;
+using ExchangeManager.Infrastructure.DataModels;
 
 namespace ExchangeManager.Infrastructure.Persistence
 {

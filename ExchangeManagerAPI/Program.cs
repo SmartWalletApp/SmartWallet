@@ -11,15 +11,11 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Custom DI Extension for linking application and infrastructure layers.
-builder.Services.AddApplicationServices();
-
 // Add DBContext to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-/* MYSQL */
-builder.Services.AddDbContext<ExchangeManagerDbContext>(options =>
-    options.UseMySql(connectionString, new MySqlServerVersion(new Version(10, 5, 19))));
 
+// Custom DI Extension for linking application and infrastructure layers.
+builder.Services.AddApplicationServices(connectionString);
 /*
 MICROSOFT SQL
     builder.Services.AddDbContext<ExchangeManagerDbContext>(options =>

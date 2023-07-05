@@ -6,38 +6,39 @@ namespace ExchangeManager.Infrastructure.Repositories
 {
     public class ExchangeRepository<T> : IExchangeRepository<T>, IAsyncDisposable where T : class
     {
-        private readonly ExchangeManagerDbContext _context;
+        protected readonly ExchangeManagerDbContext _context;
+        protected DbSet<T> EntitySet;
 
         public ExchangeRepository(ExchangeManagerDbContext context)
         {
             _context = context;
+            EntitySet = _context.Set<T>();
         }
-        protected DbSet<T> EntitySet { get { return _context.Set<T>(); } }
 
-        public async Task<IEnumerable<T>> GetAll()
+        public virtual async Task<IEnumerable<T>> GetAll()
         {
             return await EntitySet.ToListAsync();
         }
 
-        public async Task<T> GetByID(int Id)
+        public virtual async Task<T> GetByID(int Id)
         {
             return await EntitySet.FindAsync(Id);
         }
 
-        public async Task<T> Insert(T entity)
+        public virtual async Task<T> Insert(T entity)
         {
             var entryAdded = await EntitySet.AddAsync(entity);
             return entryAdded.Entity;
         }
 
-        public async Task<T> Delete(int ID)
+        public virtual async Task<T> Delete(int ID)
         {
             var entryToDelete = await EntitySet.FindAsync(ID);
             var entryRemoved = EntitySet.Remove(entryToDelete);
             return entryRemoved.Entity;
         }
 
-        public async Task<T> Update(T entity)
+        public virtual async Task<T> Update(T entity)
         {
             var entryUpdated = EntitySet.Update(entity);
             return entryUpdated.Entity;

@@ -1,5 +1,5 @@
 ﻿using ExchangeManager.ApplicationService.Contracts;
-using ExchangeManager.DomainModel.DataModels;
+using ExchangeManager.Infrastructure.DataModels;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExchangeManagerAPI.Controllers

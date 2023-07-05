@@ -20,7 +20,6 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<ExchangeManagerDbContext>(options =>
     options.UseMySql(connectionString, new MySqlServerVersion(new Version(10, 5, 19))));
 
-
 /*
 MICROSOFT SQL
     builder.Services.AddDbContext<ExchangeManagerDbContext>(options =>

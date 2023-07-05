@@ -26,37 +26,21 @@ namespace ExchangeManager.Infrastructure.Repositories
 
         public async Task<T> Insert(T entity)
         {
-            if (entity == null)
-            {
-                throw new ArgumentNullException(nameof(entity));
-            }
-
-            await EntitySet.AddAsync(entity);
-            return entity;
+            var entryAdded = await EntitySet.AddAsync(entity);
+            return entryAdded.Entity;
         }
 
         public async Task<T> Delete(int ID)
         {
-            T entity = await EntitySet.FindAsync(ID);
-
-            if (entity == null)
-            {
-                throw new ArgumentNullException(nameof(entity));
-            }
-
-            EntitySet.Remove(entity);
-            return entity;
+            var entryToDelete = await EntitySet.FindAsync(ID);
+            var entryRemoved = EntitySet.Remove(entryToDelete);
+            return entryRemoved.Entity;
         }
 
         public async Task<T> Update(T entity)
         {
-            if (entity == null)
-            {
-                throw new ArgumentNullException(nameof(entity));
-            }
-
-            EntitySet.Update(entity);
-            return entity;
+            var entryUpdated = EntitySet.Update(entity);
+            return entryUpdated.Entity;
         }
 
         public void Dispose()

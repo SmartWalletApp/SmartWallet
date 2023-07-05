@@ -8,6 +8,8 @@ namespace ExchangeManager.Infrastructure.Persistence
         private readonly ExchangeManagerDbContext _context;
 
         public IExchangeRepository<Customer> CustomerRepository { get; }
+        public IExchangeRepository<Customer> WalletRepository { get; }
+        public IExchangeRepository<Customer> BalanceHistoryRepository { get; }
         public IExchangeRepository<Coin> CoinRepository { get; }
 
         public UnitOfWork(

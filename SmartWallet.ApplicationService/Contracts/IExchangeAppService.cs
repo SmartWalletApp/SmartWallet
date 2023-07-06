@@ -19,7 +19,7 @@ namespace SmartWallet.ApplicationService.Contracts
 
         public Task<Customer> VerifyCustomerLogin(string givenEmail, string givenPassword);
 
-        TokenValidationParameters GetTokenValidationParam();
+        bool CheckJwtAuthentication(string? jwtToken);
         string GetTokenString(Customer validatedCustomer);
     }
 }

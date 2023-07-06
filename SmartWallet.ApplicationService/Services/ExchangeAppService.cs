@@ -103,7 +103,7 @@ namespace SmartWallet.ApplicationService.Services
             return BCrypt.Net.BCrypt.Verify(unhashedText, hashedText);
         }
 
-        public TokenValidationParameters GetTokenValidationParam()
+        public bool CheckJwtAuthentication(string? jwtToken)
         {
             var key = Encoding.UTF8.GetBytes(_jwtProperties.Key);
 
@@ -116,7 +116,11 @@ namespace SmartWallet.ApplicationService.Services
                 ValidateLifetime = true,
                 ValidIssuer = _jwtProperties.Issuer,
             };
-            return validationParameters;
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            tokenHandler.ValidateToken(jwtToken, validationParameters, out _);
+
+            return true;
         }
 
         public string GetTokenString(Customer validatedCustomer)

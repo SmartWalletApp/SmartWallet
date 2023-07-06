@@ -11,11 +11,8 @@
         {
             var app = builder.Build();
 
-            if (IsAppInDebug())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
+            app.UseSwagger();
+            app.UseSwaggerUI();
 
             app.UseHttpsRedirection();
             app.UseAuthorization();
@@ -27,7 +24,10 @@
         {
             #if DEBUG
             return true;
+            #else
+            return false;
             #endif
+
         }
     }
 }

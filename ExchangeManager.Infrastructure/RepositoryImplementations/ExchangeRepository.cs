@@ -1,4 +1,5 @@
-﻿using ExchangeManager.DomainModel.RepositoryContracts;
+﻿
+using ExchangeManager.DomainModel.RepositoryContracts;
 using ExchangeManager.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 

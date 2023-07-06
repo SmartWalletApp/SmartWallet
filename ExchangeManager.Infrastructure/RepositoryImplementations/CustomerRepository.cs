@@ -1,4 +1,5 @@
-﻿using ExchangeManager.DomainModel.Persistence;
+﻿
+using ExchangeManager.DomainModel.Persistence;
 using ExchangeManager.Infrastructure.DataModels;
 using ExchangeManager.Infrastructure.Persistence;
 using ExchangeManager.Infrastructure.Repositories;
@@ -11,19 +12,22 @@ namespace ExchangeManager.Infrastructure.RepositoryImplementations
         {
         }
 
-        public override Task<Customer> Delete(int ID)
-        {
-            return base.Delete(ID);
-        }
-
         public override async Task<IEnumerable<Customer>> GetAll()
         {
-            return await EntitySet.Include(c => c.Wallets).ThenInclude(w => w.Coin).ToListAsync();
+            return await EntitySet.Include(c => c.Wallets)
+                .ThenInclude(w => w.Coin)
+                .Include(c => c.Wallets)
+                .ThenInclude(w => w.BalanceHistory)
+                .ToListAsync();
         }
 
         public override async Task<Customer> GetByID(int Id)
         {
-            return await EntitySet.Include(c => c.Wallets).ThenInclude(w => w.Coin).FirstOrDefaultAsync(c => c.Id == Id);
+            return await EntitySet.Include(c => c.Wallets)
+                .ThenInclude(w => w.Coin)
+                .Include(c => c.Wallets)
+                .ThenInclude(w => w.BalanceHistory)
+                .FirstOrDefaultAsync(c => c.Id == Id);
         }
     }
 }

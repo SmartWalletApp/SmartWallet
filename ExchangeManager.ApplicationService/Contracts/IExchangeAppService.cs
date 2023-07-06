@@ -1,4 +1,4 @@
-﻿using ExchangeManager.DomainModel.DataModels;
+﻿using ExchangeManager.Infrastructure.DataModels;
 
 namespace ExchangeManager.ApplicationService.Contracts
 {

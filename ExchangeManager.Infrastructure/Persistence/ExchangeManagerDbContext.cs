@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using ExchangeManager.DomainModel.DataModels;
+using ExchangeManager.Infrastructure.DataModels;
 
 namespace ExchangeManager.Infrastructure.Persistence
 {
@@ -10,9 +10,9 @@ namespace ExchangeManager.Infrastructure.Persistence
         }
 
         public DbSet<Customer> Customers { get; set; }
-        public DbSet<Coin> Coin { get; set; } // Needed because sometimes we need to interact with Coins directly, not related to any Customer in particular.
-        // public DbSet<Wallet> Wallet { get; set; } // Not needed, as Wallets are inside Customers
-        // public DbSet<BalanceHistory> BalanceHistory { get; set; } // Not needed, as BalanceHistory are inside Wallet
+        public DbSet<Coin> Coin { get; set; }
+        public DbSet<Wallet> Wallet { get; set; }
+        public DbSet<BalanceHistory> BalanceHistory { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

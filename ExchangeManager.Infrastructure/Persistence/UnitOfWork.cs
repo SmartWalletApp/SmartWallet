@@ -1,5 +1,6 @@
-﻿using ExchangeManager.DomainModel.RepositoryContracts;
-using ExchangeManager.DomainModel.DataModels;
+﻿using ExchangeManager.DomainModel.Persistence;
+using ExchangeManager.DomainModel.RepositoryContracts;
+using ExchangeManager.Infrastructure.DataModels;
 
 namespace ExchangeManager.Infrastructure.Persistence
 {
@@ -7,17 +8,23 @@ namespace ExchangeManager.Infrastructure.Persistence
     {
         private readonly ExchangeManagerDbContext _context;
 
-        public IExchangeRepository<Customer> CustomerRepository { get; }
+        public ICustomerRepository<Customer> CustomerRepository { get; }
+        public IWalletRepository<Wallet> WalletRepository { get; }
+        public IExchangeRepository<BalanceHistory> BalanceHistoryRepository { get; }
         public IExchangeRepository<Coin> CoinRepository { get; }
 
         public UnitOfWork(
             ExchangeManagerDbContext context,
-            IExchangeRepository<Customer> customerRepository,
-            IExchangeRepository<Coin> coinRepository)
+            ICustomerRepository<Customer> customerRepository,
+            IWalletRepository<Wallet> walletRepository,
+            IExchangeRepository<Coin> coinRepository,
+            IExchangeRepository<BalanceHistory> balanceHistoryRepository)
         {
             _context = context;
             CustomerRepository = customerRepository;
+            WalletRepository = walletRepository;
             CoinRepository = coinRepository;
+            BalanceHistoryRepository = balanceHistoryRepository;
         }
 
         public void Save()

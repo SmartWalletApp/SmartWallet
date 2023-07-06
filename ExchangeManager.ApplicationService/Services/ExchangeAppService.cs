@@ -1,7 +1,8 @@
 ﻿using ExchangeManager.ApplicationService.Contracts;
-using ExchangeManager.DomainModel.DataModels;
+using ExchangeManager.Infrastructure.DataModels;
 using ExchangeManager.DomainModel.RepositoryContracts;
 using System.Text;
+using ExchangeManager.Infrastructure.Persistence;
 
 namespace ExchangeManager.ApplicationService.Services
 {
@@ -16,12 +17,12 @@ namespace ExchangeManager.ApplicationService.Services
 
         public async Task<IEnumerable<Customer>> GetCustomers()
         {
-            return await _unitOfWork.CustomerRepository.GetAll();
+            return await ((UnitOfWork)_unitOfWork).CustomerRepository.GetAll();
         }
 
         public async Task<Customer> GetCustomer(int id)
         {
-            return await _unitOfWork.CustomerRepository.GetByID(id);
+            return await ((UnitOfWork)_unitOfWork).CustomerRepository.GetByID(id);
         }
 
         public async Task<Customer> InsertCustomer(Customer customer)
@@ -29,7 +30,7 @@ namespace ExchangeManager.ApplicationService.Services
             // Currently bcrypt will use Cost 11 (2048 iteratios) by default, which is around 140ms in debug using a Ryzen 5 3600X and DDR4 3200MHz RAM.
             customer.Password = BCrypt.Net.BCrypt.HashPassword(customer.Password);
 
-            var coins = await _unitOfWork.CoinRepository.GetAll();
+            var coins = await ((UnitOfWork)_unitOfWork).CoinRepository.GetAll();
 
             customer.Wallets = new List<Wallet>();
 
@@ -43,21 +44,21 @@ namespace ExchangeManager.ApplicationService.Services
                 };
                 customer.Wallets.Add(wallet);
             }
-            var output = await _unitOfWork.CustomerRepository.Insert(customer);
+            var output = await ((UnitOfWork)_unitOfWork).CustomerRepository.Insert(customer);
             _unitOfWork.Save();
             return output;
         }
 
         public async Task<Customer> DeleteCustomer(int id)
         {
-            var output = await _unitOfWork.CustomerRepository.Delete(id);
+            var output = await ((UnitOfWork)_unitOfWork).CustomerRepository.Delete(id);
             _unitOfWork.Save();
             return output;
         }
 
         public async Task<Customer> UpdateCustomer(Customer newCustomer)
         {
-            var output = await _unitOfWork.CustomerRepository.Update(newCustomer);
+            var output = await ((UnitOfWork)_unitOfWork).CustomerRepository.Update(newCustomer);
             _unitOfWork.Save();
             return output;
         }
@@ -66,9 +67,9 @@ namespace ExchangeManager.ApplicationService.Services
         {
             _unitOfWork.EnsureDeleted();
             _unitOfWork.EnsureCreated();
-            _unitOfWork.CoinRepository.Insert(new Coin { Name = "USD", BuyValue = 0, SellValue = 0 });
-            _unitOfWork.CoinRepository.Insert(new Coin { Name = "EUR", BuyValue = 0, SellValue = 0 });
-            _unitOfWork.CoinRepository.Insert(new Coin { Name = "BTC", BuyValue = 0, SellValue = 0 });
+            ((UnitOfWork)_unitOfWork).CoinRepository.Insert(new Coin { Name = "USD", BuyValue = 0, SellValue = 0 });
+            ((UnitOfWork)_unitOfWork).CoinRepository.Insert(new Coin { Name = "EUR", BuyValue = 0, SellValue = 0 });
+            ((UnitOfWork)_unitOfWork).CoinRepository.Insert(new Coin { Name = "BTC", BuyValue = 0, SellValue = 0 });
             _unitOfWork.Save();
             return Task.CompletedTask;
         }

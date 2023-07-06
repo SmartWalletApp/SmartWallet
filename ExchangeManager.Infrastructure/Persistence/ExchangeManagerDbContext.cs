@@ -14,43 +14,6 @@ namespace ExchangeManager.Infrastructure.Persistence
         public DbSet<Wallet> Wallet { get; set; }
         public DbSet<BalanceHistory> BalanceHistory { get; set; }
 
-        public override int SaveChanges()
-        {
-            // If a new Customer has been added, add one wallet per each coin.
-            var addedCustomerEntry = ChangeTracker.Entries<Customer>()
-                .FirstOrDefault(entry => entry.State == EntityState.Added);
-
-            if (addedCustomerEntry != null)
-                return CreateWalletForNewCustomer(addedCustomerEntry.Entity);
-            else
-                return base.SaveChanges();
-        }
-
-        private int CreateWalletForNewCustomer(Customer customer)
-        {
-            using (var transaction = Database.BeginTransaction())
-            {
-                customer.Wallets = new List<Wallet>();
-                var coins = Coin.ToList();
-                foreach (var coin in coins)
-                {
-                    customer.Wallets.Add
-                    (
-                        new Wallet
-                        {
-                            Coin = coin,
-                            Balance = 0,
-                            BalanceHistory = new List<BalanceHistory>()
-                        }
-                    );
-                }
-
-                var modifiedRows = base.SaveChanges();
-                transaction.Commit();
-                return modifiedRows;
-            }
-        }
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Customer>(entity =>
@@ -63,7 +26,7 @@ namespace ExchangeManager.Infrastructure.Persistence
                 entity.Property(b => b.Password).IsRequired();
                 entity.Property(b => b.IsActive).IsRequired();
                 entity.Property(b => b.CreationDate).HasDefaultValueSql("CURRENT_TIMESTAMP");
-                //entity.Property(b => b.Wallets).IsRequired(); // Objects cannot be obligatory
+                //entity.Property(b => b.Wallets).IsRequired(); // Navigation objects cannot be required
 
                 entity.HasMany(c => c.Wallets) // One customer has many wallets
                 .WithOne() // Each wallet has one customer
@@ -77,8 +40,8 @@ namespace ExchangeManager.Infrastructure.Persistence
                 entity.HasKey(w => w.Id);
                 entity.Property(w => w.Id).ValueGeneratedOnAdd();
                 entity.Property(w => w.Balance).IsRequired();
-                //entity.Property(w => w.Coin).IsRequired(); // Objects cannot be obligatory
-                //entity.Property(w => w.BalanceHistory).IsRequired(); // Objects cannot be obligatory
+                //entity.Property(w => w.Coin).IsRequired(); // Navigation objects cannot be required
+                //entity.Property(w => w.BalanceHistory).IsRequired(); // Navigation objects cannot be required
 
                 entity.HasOne(w => w.Coin);
 

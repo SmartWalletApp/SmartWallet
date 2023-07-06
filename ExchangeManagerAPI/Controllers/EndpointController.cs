@@ -1,6 +1,5 @@
-﻿using ExchangeManager.DomainModel.RepositoryContracts;
+﻿using ExchangeManager.ApplicationService.Contracts;
 using ExchangeManager.Infrastructure.DataModels;
-using ExchangeManager.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExchangeManagerAPI.Controllers
@@ -10,51 +9,49 @@ namespace ExchangeManagerAPI.Controllers
     [Route("[controller]")]
     public class EndpointController : ControllerBase
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IExchangeAppService _appService;
 
-        public EndpointController(IUnitOfWork unitOfWork)
+        public EndpointController(IExchangeAppService appService)
         {
-            _unitOfWork = unitOfWork;
+            _appService = appService;
         }
 
         [HttpGet(Name = "GetCustomers")]
         public async Task<IEnumerable<Customer>> GetCustomers()
         {
-            return await ((UnitOfWork)_unitOfWork).CustomerRepository.GetAll();
+            return await _appService.GetCustomers();
         }
 
         [HttpGet("{id}", Name = "GetCustomer")]
         public async Task<Customer> GetCustomer(int id)
         {
-            return await ((UnitOfWork)_unitOfWork).CustomerRepository.GetByID(id);
+            return await _appService.GetCustomer(id);
         }
 
         [HttpPost(Name = "InsertCustomer")]
-        public async Task<ActionResult<Customer>> PostCustomer(Customer customer)
+        public async Task<ActionResult<Customer>> InsertCustomer(Customer customer)
         {
-            return Ok(await ((UnitOfWork)_unitOfWork).CustomerRepository.Insert(customer));
+            return Ok(await _appService.InsertCustomer(customer));
         }
 
         [HttpDelete("{id}", Name = "DeleteCustomer")]
-        public async Task<IActionResult> DeleteCustomer(int id)
+        public async Task<ActionResult<Customer>> DeleteCustomer(int id)
         {
-            return Ok(await ((UnitOfWork)_unitOfWork).CustomerRepository.Delete(id));
+            return Ok(await _appService.DeleteCustomer(id));
         }
 
         [HttpPut(Name = "UpdateStudent")]
-        public async Task<ActionResult<Customer>> UpdateStudent([FromBody] Customer newCustomer)
+        public async Task<ActionResult<Customer>> UpdateCustomer([FromBody] Customer newCustomer)
         {
-            return Ok(await ((UnitOfWork)_unitOfWork).CustomerRepository.Update(newCustomer));
+            return Ok(await _appService.UpdateCustomer(newCustomer));
         }
 
-#if DEBUG
+        #if DEBUG
         [HttpDelete(Name = "RestoreDB")]
-        public IActionResult RestoreDB()
+        public async Task<ActionResult> RestoreDB()
         {
-            _unitOfWork.EnsureDeleted();
-            _unitOfWork.EnsureCreated();
-            //_unitOfWork.SetDefaultCoin();
-            return Ok($"Restored successfully");
+            await _appService.RestoreDB();
+            return Ok("DB Restored");
         }
         # endif
 

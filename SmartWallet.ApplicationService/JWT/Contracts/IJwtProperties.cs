@@ -1,4 +1,4 @@
-﻿namespace SmartWallet.API.JWT.Contracts
+﻿namespace SmartWallet.ApplicationService.JWT.Contracts
 {
     public interface IJwtProperties
     {

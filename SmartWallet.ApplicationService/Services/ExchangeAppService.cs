@@ -3,16 +3,22 @@ using SmartWallet.Infrastructure.DataModels;
 using SmartWallet.DomainModel.RepositoryContracts;
 using System.Text;
 using SmartWallet.Infrastructure.Persistence;
+using Microsoft.IdentityModel.Tokens;
+using SmartWallet.ApplicationService.JWT.Contracts;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace SmartWallet.ApplicationService.Services
 {
     public class SmartWalletAppService : ISmartWalletAppService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IJwtProperties _jwtProperties;
 
-        public SmartWalletAppService(IUnitOfWork unitOfWork)
+        public SmartWalletAppService(IUnitOfWork unitOfWork, IJwtProperties jwtProperties)
         {
             _unitOfWork = unitOfWork;
+            _jwtProperties = jwtProperties;
         }
 
         public async Task<Customer> VerifyCustomerLogin(string givenEmail, string givenPassword)
@@ -97,5 +103,42 @@ namespace SmartWallet.ApplicationService.Services
             return BCrypt.Net.BCrypt.Verify(unhashedText, hashedText);
         }
 
+        public TokenValidationParameters GetTokenValidationParam()
+        {
+            var key = Encoding.UTF8.GetBytes(_jwtProperties.Key);
+
+            var validationParameters = new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(key),
+                ValidateIssuer = true,
+                ValidateAudience = false,
+                ValidateLifetime = true,
+                ValidIssuer = _jwtProperties.Issuer,
+            };
+            return validationParameters;
+        }
+
+        public string GetTokenString(Customer validatedCustomer)
+        {
+            var claims = new[]
+            {
+                    new Claim(ClaimTypes.NameIdentifier, validatedCustomer.Email)
+                };
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtProperties.Key));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.Now.AddDays(1),
+                SigningCredentials = creds,
+                Issuer = _jwtProperties.Issuer
+            };
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+
+            return tokenHandler.WriteToken(token);
+        }
     }
 }

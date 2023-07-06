@@ -3,9 +3,6 @@ using SmartWallet.Infrastructure.DataModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using SmartWallet.API.JWT.Contracts;
 
 namespace SmartWallet.API.Controllers
 {
@@ -15,18 +12,16 @@ namespace SmartWallet.API.Controllers
     public class EndpointController : ControllerBase
     {
         private readonly ISmartWalletAppService _appService;
-        private readonly IJwtProperties _jwtProperties;
 
-        public EndpointController(ISmartWalletAppService appService, IJwtProperties jwtProperties)
+        public EndpointController(ISmartWalletAppService appService)
         {
             _appService = appService;
-            _jwtProperties = jwtProperties;
         }
 
         [HttpGet(Name = "GetCustomers")]
         public async Task<IActionResult> GetCustomers()
         {
-            if (ValidateToken().Value)
+            if (ValidateToken())
             {
                 return Ok(await _appService.GetCustomers());
             }
@@ -39,7 +34,7 @@ namespace SmartWallet.API.Controllers
         [HttpGet("{id}", Name = "GetCustomer")]
         public async Task<IActionResult> GetCustomer(int id)
         {
-            if (ValidateToken().Value)
+            if (ValidateToken())
             {
                 return Ok(await _appService.GetCustomer(id));
             }
@@ -52,7 +47,7 @@ namespace SmartWallet.API.Controllers
         [HttpPost(Name = "InsertCustomer")]
         public async Task<ActionResult<Customer>> InsertCustomer(Customer customer)
         {
-            if (ValidateToken().Value)
+            if (ValidateToken())
             {
                 return Ok(await _appService.InsertCustomer(customer));
             }
@@ -65,7 +60,7 @@ namespace SmartWallet.API.Controllers
         [HttpDelete("{id}", Name = "DeleteCustomer")]
         public async Task<ActionResult<Customer>> DeleteCustomer(int id)
         {
-            if (ValidateToken().Value)
+            if (ValidateToken())
             {
                 return Ok(await _appService.DeleteCustomer(id));
             }
@@ -78,7 +73,7 @@ namespace SmartWallet.API.Controllers
         [HttpPut(Name = "UpdateStudent")]
         public async Task<ActionResult<Customer>> UpdateCustomer([FromBody] Customer newCustomer)
         {
-            if (ValidateToken().Value)
+            if (ValidateToken())
             {
                 return Ok(await _appService.UpdateCustomer(newCustomer));
             }
@@ -92,7 +87,7 @@ namespace SmartWallet.API.Controllers
         [HttpDelete(Name = "RestoreDB")]
         public async Task<ActionResult> RestoreDB()
         {
-            if (ValidateToken().Value)
+            if (ValidateToken())
             {
                 await _appService.RestoreDB();
                 return Ok("DB Restored");
@@ -111,24 +106,8 @@ namespace SmartWallet.API.Controllers
             var validatedCustomer = await _appService.VerifyCustomerLogin(givenEmail, givenPassword);
             if (validatedCustomer != null)
             {
-                var claims = new[]
-                {
-                    new Claim(ClaimTypes.NameIdentifier, validatedCustomer.Email)
-                };
 
-                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtProperties.Key));
-                var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
-                var tokenDescriptor = new SecurityTokenDescriptor
-                {
-                    Subject = new ClaimsIdentity(claims),
-                    Expires = DateTime.Now.AddDays(1),
-                    SigningCredentials = creds,
-                    Issuer = _jwtProperties.Issuer
-                };
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var token = tokenHandler.CreateToken(tokenDescriptor);
-
-                var tokenString = tokenHandler.WriteToken(token);
+                var tokenString = _appService.GetTokenString(validatedCustomer);
 
                 // Add token to client cookie
                 Response.Cookies.Append("jwt", tokenString, new CookieOptions
@@ -147,45 +126,17 @@ namespace SmartWallet.API.Controllers
             }
         }
 
-        // Verify the user is logged
         [HttpGet("VerifyLogin")]
-        public ActionResult<bool> ValidateToken()
+        public bool ValidateToken()
         {
-            if (Request.Cookies.TryGetValue("jwt", out string jwtToken))
+            if (Request.Cookies.TryGetValue("jwt", out var jwtToken))
             {
                 var tokenHandler = new JwtSecurityTokenHandler();
-                var key = Encoding.UTF8.GetBytes(_jwtProperties.Key);
-
-                var validationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(key),
-                    ValidateIssuer = true,
-                    ValidateAudience = false,
-                    ValidateLifetime = true,
-                    ValidIssuer = _jwtProperties.Issuer,
-                };
-
-                try
-                {
-                    var principal = tokenHandler.ValidateToken(jwtToken, validationParameters, out var validatedToken);
-                    //return Ok("Token is valid");
-                    return Ok();
-                }
-                catch (Exception ex)
-                {
-                    //return BadRequest("Token is invalid: " + ex.Message);
-                    return ValidationProblem();
-                }
+                TokenValidationParameters validationParameters = _appService.GetTokenValidationParam();
+                tokenHandler.ValidateToken(jwtToken, validationParameters, out _);
+                return true;
             }
-            else
-            {
-                //return BadRequest("No JWT cookie found");
-                return Unauthorized();
-            }
+            return false;
         }
-
-
-
     }
 }

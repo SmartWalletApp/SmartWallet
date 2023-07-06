@@ -12,6 +12,10 @@ namespace SmartWallet.Infrastructure.RepositoryImplementations
         {
         }
 
+        public async Task<Customer> GetByEmail(string email)
+        {
+            return await EntitySet.FirstAsync(x => x.Email == email);
+        }
         public override async Task<IEnumerable<Customer>> GetAll()
         {
             return await EntitySet.Include(c => c.Wallets)

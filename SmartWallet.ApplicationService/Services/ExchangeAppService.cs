@@ -15,6 +15,19 @@ namespace SmartWallet.ApplicationService.Services
             _unitOfWork = unitOfWork;
         }
 
+        public async Task<Customer> VerifyCustomerLogin(string givenEmail, string givenPassword)
+        {
+            var customerFound = await ((UnitOfWork)_unitOfWork).CustomerRepository.GetByEmail(givenEmail);
+            if (customerFound != null)
+            {
+                if (VerifyPassword(givenPassword, customerFound.Password))
+                {
+                    return customerFound;
+                }
+            }
+            return null;
+        }
+
         public async Task<IEnumerable<Customer>> GetCustomers()
         {
             return await ((UnitOfWork)_unitOfWork).CustomerRepository.GetAll();
@@ -28,7 +41,7 @@ namespace SmartWallet.ApplicationService.Services
         public async Task<Customer> InsertCustomer(Customer customer)
         {
             // Currently bcrypt will use Cost 11 (2048 iteratios) by default, which is around 140ms in debug using a Ryzen 5 3600X and DDR4 3200MHz RAM.
-            customer.Password = BCrypt.Net.BCrypt.HashPassword(customer.Password);
+            customer.Password = HashPassword(customer.Password);
 
             var coins = await ((UnitOfWork)_unitOfWork).CoinRepository.GetAll();
 
@@ -72,6 +85,16 @@ namespace SmartWallet.ApplicationService.Services
             ((UnitOfWork)_unitOfWork).CoinRepository.Insert(new Coin { Name = "BTC", BuyValue = 0, SellValue = 0 });
             _unitOfWork.Save();
             return Task.CompletedTask;
+        }
+
+        private string HashPassword(string unhashedPass)
+        {
+            // Currently bcrypt will use Cost 11 (2048 iteratios) by default, which is around 140ms in debug using a Ryzen 5 3600X and DDR4 3200MHz RAM.
+            return BCrypt.Net.BCrypt.HashPassword(unhashedPass);
+        }
+        private bool VerifyPassword(string unhashedText, string hashedText)
+        {
+            return BCrypt.Net.BCrypt.Verify(unhashedText, hashedText);
         }
 
     }

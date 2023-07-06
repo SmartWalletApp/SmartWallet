@@ -1,0 +1,60 @@
+﻿
+using SmartWallet.DomainModel.RepositoryContracts;
+using SmartWallet.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
+
+namespace SmartWallet.Infrastructure.Repositories
+{
+    public class SmartWalletRepository<T> : ISmartWalletRepository<T>, IAsyncDisposable where T : class
+    {
+        protected readonly SmartWalletDbContext _context;
+        protected DbSet<T> EntitySet;
+
+        public SmartWalletRepository(SmartWalletDbContext context)
+        {
+            _context = context;
+            EntitySet = _context.Set<T>();
+        }
+
+        public virtual async Task<IEnumerable<T>> GetAll()
+        {
+            return await EntitySet.ToListAsync();
+        }
+
+        public virtual async Task<T> GetByID(int Id)
+        {
+            return await EntitySet.FindAsync(Id);
+        }
+
+        public virtual async Task<T> Insert(T entity)
+        {
+            var entryAdded = await EntitySet.AddAsync(entity);
+            return entryAdded.Entity;
+        }
+
+        public virtual async Task<T> Delete(int ID)
+        {
+            var entryToDelete = await EntitySet.FindAsync(ID);
+            var entryRemoved = EntitySet.Remove(entryToDelete);
+            return entryRemoved.Entity;
+        }
+
+        public virtual async Task<T> Update(T entity)
+        {
+            var entryUpdated = EntitySet.Update(entity);
+            return entryUpdated.Entity;
+        }
+
+        public void Dispose()
+        {
+            _context.Dispose();
+            GC.SuppressFinalize(this);
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            await _context.DisposeAsync();
+            GC.SuppressFinalize(this);
+        }
+    }
+}

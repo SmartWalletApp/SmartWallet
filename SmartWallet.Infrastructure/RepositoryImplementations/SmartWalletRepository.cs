@@ -3,7 +3,7 @@ using SmartWallet.DomainModel.RepositoryContracts;
 using SmartWallet.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
-namespace SmartWallet.Infrastructure.Repositories
+namespace SmartWallet.Infrastructure.RepositoryImplementations
 {
     public class SmartWalletRepository<T> : ISmartWalletRepository<T>, IAsyncDisposable where T : class
     {

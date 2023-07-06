@@ -1,4 +1,5 @@
-﻿using SmartWallet.Infrastructure.DataModels;
+﻿using Microsoft.IdentityModel.Tokens;
+using SmartWallet.Infrastructure.DataModels;
 
 namespace SmartWallet.ApplicationService.Contracts
 {
@@ -17,5 +18,8 @@ namespace SmartWallet.ApplicationService.Contracts
         public Task RestoreDB();
 
         public Task<Customer> VerifyCustomerLogin(string givenEmail, string givenPassword);
+
+        TokenValidationParameters GetTokenValidationParam();
+        string GetTokenString(Customer validatedCustomer);
     }
 }

@@ -1,4 +1,4 @@
-﻿using SmartWallet.API.JWT.Contracts;
+﻿using SmartWallet.ApplicationService.JWT.Contracts;
 
 namespace SmartWallet.API.JWT.Implementations
 {

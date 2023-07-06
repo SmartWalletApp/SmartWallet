@@ -2,7 +2,6 @@
 using SmartWallet.DomainModel.Persistence;
 using SmartWallet.Infrastructure.DataModels;
 using SmartWallet.Infrastructure.Persistence;
-using SmartWallet.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 namespace SmartWallet.Infrastructure.RepositoryImplementations
 {

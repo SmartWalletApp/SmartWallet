@@ -1,4 +1,5 @@
-﻿using ExchangeManager.DomainModel.Persistence;
+﻿
+using ExchangeManager.DomainModel.Persistence;
 using ExchangeManager.Infrastructure.DataModels;
 using ExchangeManager.Infrastructure.Persistence;
 using ExchangeManager.Infrastructure.Repositories;
@@ -10,11 +11,6 @@ namespace ExchangeManager.Infrastructure.RepositoryImplementations
     {
         public WalletRepository(ExchangeManagerDbContext context) : base(context)
         {
-        }
-
-        public override Task<Wallet> Delete(int ID)
-        {
-            return base.Delete(ID);
         }
 
         public override async Task<IEnumerable<Wallet>> GetAll()

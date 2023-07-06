@@ -1,4 +1,4 @@
-﻿namespace ExchangeManager.DomainModel.DataModels
+﻿namespace ExchangeManager.DomainModel.Entities
 {
     public class BalanceHistory
     {

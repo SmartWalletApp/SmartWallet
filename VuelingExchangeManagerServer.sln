@@ -13,7 +13,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "4.InfrastructureLayer", "4.
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "5.CrossCuttingLayer", "5.CrossCuttingLayer", "{2CF38238-B499-4638-A88E-02FEB2F18C27}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExchangeManagerAPI", "ExchangeManagerAPI\ExchangeManagerAPI.csproj", "{AA45C445-B82B-4F63-99AC-568CBA9B09A7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApi", "ExchangeManagerAPI\WebApi.csproj", "{AA45C445-B82B-4F63-99AC-568CBA9B09A7}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExchangeManager.ApplicationService", "ExchangeManager.ApplicationService\ExchangeManager.ApplicationService.csproj", "{D2C0CD39-7EA8-47B9-8105-4F43C47AAB5B}"
 EndProject

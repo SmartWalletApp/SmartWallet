@@ -7,16 +7,16 @@ EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
-COPY ["SmartWallet.API/SmartWalletAPI.csproj", "SmartWalletAPI/"]
-RUN dotnet restore "SmartWalletAPI/SmartWalletAPI.csproj"
+COPY ["SmartWallet.API/SmartWallet.API.csproj", "SmartWallet.API/"]
+RUN dotnet restore "SmartWallet.API/SmartWallet.API.csproj"
 COPY . .
-WORKDIR "/src/SmartWalletAPI"
-RUN dotnet build "SmartWalletAPI.csproj" -c Release -o /app/build
+WORKDIR "/src/SmartWallet.API"
+RUN dotnet build "SmartWallet.API.csproj" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "SmartWalletAPI.csproj" -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "SmartWallet.API.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "SmartWalletAPI.dll"]
+ENTRYPOINT ["dotnet", "SmartWallet.API.dll"]

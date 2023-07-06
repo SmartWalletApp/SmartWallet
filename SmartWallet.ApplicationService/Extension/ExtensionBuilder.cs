@@ -18,6 +18,12 @@ namespace SmartWallet.ApplicationService.Extension
             services.AddDbContext<SmartWalletDbContext>(options =>
                 options.UseMySql(connectionString, new MySqlServerVersion(new Version(10, 5, 19))));
 
+            /*
+            MICROSOFT SQL
+                builder.Services.AddDbContext<SmartWalletDbContext>(options =>
+                options.UseSqlServer(connectionString));
+            */
+
             services.AddScoped<ISmartWalletAppService, SmartWalletAppService>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<ISmartWalletRepository<Coin>, SmartWalletRepository<Coin>>();

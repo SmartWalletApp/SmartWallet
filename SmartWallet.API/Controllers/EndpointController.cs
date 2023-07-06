@@ -131,10 +131,7 @@ namespace SmartWallet.API.Controllers
         {
             if (Request.Cookies.TryGetValue("jwt", out var jwtToken))
             {
-                var tokenHandler = new JwtSecurityTokenHandler();
-                TokenValidationParameters validationParameters = _appService.GetTokenValidationParam();
-                tokenHandler.ValidateToken(jwtToken, validationParameters, out _);
-                return true;
+                return _appService.CheckJwtAuthentication(jwtToken);
             }
             return false;
         }

@@ -23,12 +23,14 @@ namespace SmartWallet.API.Controllers
             {
                 if (Request.Cookies.TryGetValue("jwt", out var jwtToken))
                 {
-                    if (_appService.CheckJwtAuthentication(jwtToken))
+                    var claims = _appService.GetTokenInfo(jwtToken);
+                    if (claims != null)
                     {
-                        return Ok(await _appService.GetCustomers());
+                        if (claims["group"] == "admin")
+                        {
+                            return Ok(await _appService.GetCustomers());
+                        }
                     }
-                    return Unauthorized();
-
                 }
                 return Unauthorized();
             }
@@ -39,18 +41,18 @@ namespace SmartWallet.API.Controllers
         }
 
         [HttpGet("{id}", Name = "GetCustomer")]
-        public async Task<IActionResult> GetCustomer(int id)
+        public async Task<IActionResult> GetCustomer()
         {
             try
             {
                 if (Request.Cookies.TryGetValue("jwt", out var jwtToken))
                 {
-                    if (_appService.CheckJwtAuthentication(jwtToken))
+                    var claims = _appService.GetTokenInfo(jwtToken);
+                    if (claims != null)
                     {
-                        return Ok(await _appService.GetCustomer(id));
+                        int clientId = Int32.Parse(claims["id"]);
+                        return Ok(await _appService.GetCustomer(clientId));
                     }
-                    return Unauthorized();
-
                 }
                 return Unauthorized();
             }
@@ -67,18 +69,18 @@ namespace SmartWallet.API.Controllers
         }
 
         [HttpDelete("{id}", Name = "DeleteCustomer")]
-        public async Task<ActionResult<Customer>> DeleteCustomer(int id)
+        public async Task<ActionResult<Customer>> DeleteCustomer()
         {
             try
             {
                 if (Request.Cookies.TryGetValue("jwt", out var jwtToken))
                 {
-                    if (_appService.CheckJwtAuthentication(jwtToken))
+                    var claims = _appService.GetTokenInfo(jwtToken);
+                    if (claims != null)
                     {
-                        return Ok(await _appService.DeleteCustomer(id));
+                        int clientId = Int32.Parse(claims["id"]);
+                        return Ok(await _appService.DeleteCustomer(clientId));
                     }
-                    return Unauthorized();
-
                 }
                 return Unauthorized();
             }
@@ -95,12 +97,15 @@ namespace SmartWallet.API.Controllers
             {
                 if (Request.Cookies.TryGetValue("jwt", out var jwtToken))
                 {
-                    if (_appService.CheckJwtAuthentication(jwtToken))
+                    var claims = _appService.GetTokenInfo(jwtToken);
+                    if (claims != null)
                     {
-                        return Ok(await _appService.UpdateCustomer(newCustomer));
+                        int clientId = Int32.Parse(claims["id"]);
+                        if (newCustomer.Id == clientId)
+                        {
+                            return Ok(await _appService.UpdateCustomer(newCustomer));
+                        }
                     }
-                    return Unauthorized();
-
                 }
                 return Unauthorized();
             }
@@ -118,13 +123,15 @@ namespace SmartWallet.API.Controllers
             {
                 if (Request.Cookies.TryGetValue("jwt", out var jwtToken))
                 {
-                    if (_appService.CheckJwtAuthentication(jwtToken))
+                    var claims = _appService.GetTokenInfo(jwtToken);
+                    if (claims != null)
                     {
-                        await _appService.RestoreDB();
-                        return Ok("DB Restored");
+                        if (claims["group"] == "admin")
+                        {
+                            await _appService.RestoreDB();
+                            return Ok("DB Restored");
+                        }
                     }
-                    return Unauthorized();
-
                 }
                 return Unauthorized();
             }
@@ -140,15 +147,18 @@ namespace SmartWallet.API.Controllers
             var validatedCustomer = await _appService.VerifyCustomerLogin(givenEmail, givenPassword);
             if (validatedCustomer != null)
             {
-                var tokenString = _appService.GetTokenString(validatedCustomer);
+                var tokenString = _appService.CreateToken(validatedCustomer);
 
-                // Add token to client cookie
                 Response.Cookies.Append("jwt", tokenString, new CookieOptions
                 {
                     HttpOnly = true,
                     SameSite = SameSiteMode.Strict,
                     Secure = true,
-                    Expires = DateTime.Now.AddDays(1)
+                    #if DEBUG
+                    Expires = DateTime.Now.AddHours(6)
+                    #else
+                    Expires = DateTime.Now.AddMinutes(10)
+                    #endif
                 });
                 return Ok(new { token = tokenString });
             }
@@ -159,19 +169,23 @@ namespace SmartWallet.API.Controllers
         }
 
         [HttpGet("ValidateWebLogin")]
-        public IActionResult ValidateWebLogin()
+        public async Task<IActionResult> ValidateWebLoginAsync()
         {
             try
             {
                 if (Request.Cookies.TryGetValue("jwt", out var jwtToken))
                 {
-                    return Ok(_appService.CheckJwtAuthentication(jwtToken));
+                    var claims = _appService.GetTokenInfo(jwtToken);
+                    if (claims != null)
+                    {
+                        return Ok(claims);
+                    }
                 }
-                return Unauthorized("No session found");
+                return Unauthorized();
             }
-            catch (Exception ex)
+            catch
             {
-                return Unauthorized(ex.Message);
+                return Unauthorized();
             }
         }
 
@@ -183,7 +197,6 @@ namespace SmartWallet.API.Controllers
                 Response.Cookies.Delete("jwt");
                 return Ok("Logout successful");
             }
-
             return BadRequest("No active session found");
         }
 

@@ -23,6 +23,7 @@ namespace SmartWallet.Infrastructure.Persistence
                 entity.Property(b => b.Email).IsRequired();
                 entity.HasIndex(b => b.Email).IsUnique();
                 entity.Property(b => b.Password).IsRequired();
+                entity.Property(b => b.SecurityGroup).HasDefaultValue("user");
                 entity.Property(b => b.IsActive).HasDefaultValue(true);
                 entity.Property(b => b.CreationDate).HasDefaultValue(DateTime.Now);
                 //entity.Property(b => b.Wallets).IsRequired(); // Navigation objects cannot be required
@@ -56,6 +57,7 @@ namespace SmartWallet.Infrastructure.Persistence
                 entity.HasKey(b => b.Id);
                 entity.Property(b => b.Id).ValueGeneratedOnAdd();
                 entity.Property(b => b.Variation).IsRequired();
+                entity.Property(b => b.IsIncome).IsRequired();
                 entity.Property(b => b.Category).IsRequired();
                 entity.Property(b => b.Date).HasDefaultValue(DateTime.Now);
                 entity.Property(b => b.Description).IsRequired();

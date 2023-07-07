@@ -26,9 +26,12 @@ namespace SmartWallet.ApplicationService.Services
             var customerFound = await ((UnitOfWork)_unitOfWork).CustomerRepository.GetByEmail(givenEmail);
             if (customerFound != null)
             {
-                if (VerifyPassword(givenPassword, customerFound.Password))
+                if (customerFound.IsActive)
                 {
-                    return customerFound;
+                    if (VerifyPassword(givenPassword, customerFound.Password))
+                    {
+                        return customerFound;
+                    }
                 }
             }
             return null;
@@ -90,11 +93,12 @@ namespace SmartWallet.ApplicationService.Services
             #if DEBUG
             var debugUser = InsertCustomer(new Customer
             {
-                Name = "debug",
-                Surname = "debug",
-                Email = "debug",
-                Password = "debug",
-                IsActive = true
+                Name = "admin",
+                Surname = "admin",
+                Email = "admin",
+                Password = "admin",
+                IsActive = true,
+                SecurityGroup = "admin"
             }).Result;
             #endif
 
@@ -116,7 +120,7 @@ namespace SmartWallet.ApplicationService.Services
             return BCrypt.Net.BCrypt.Verify(unhashedText, hashedText);
         }
 
-        public bool CheckJwtAuthentication(string? jwtToken)
+        public Dictionary<string, string> GetTokenInfo(string? jwtToken)
         {
             var key = Encoding.UTF8.GetBytes(_jwtProperties.Key);
 
@@ -131,17 +135,33 @@ namespace SmartWallet.ApplicationService.Services
             };
 
             var tokenHandler = new JwtSecurityTokenHandler();
-            tokenHandler.ValidateToken(jwtToken, validationParameters, out _);
+            SecurityToken validatedToken;
+            try
+            {
+                tokenHandler.ValidateToken(jwtToken, validationParameters, out validatedToken);
+            }
+            catch
+            {
+                return null;
+            }
 
-            return true;
+            var jwtSecurityToken = validatedToken as JwtSecurityToken;
+
+            if (jwtSecurityToken != null)
+            {
+                return jwtSecurityToken.Claims.ToDictionary(c => c.Type, c => c.Value);
+            }
+            return null;
         }
 
-        public string GetTokenString(Customer validatedCustomer)
+        public string CreateToken(Customer validatedCustomer)
         {
             var claims = new[]
             {
-                    new Claim(ClaimTypes.NameIdentifier, validatedCustomer.Email)
-                };
+                new Claim("email", validatedCustomer.Email),
+                new Claim("id", validatedCustomer.Id.ToString()),
+                new Claim("group", validatedCustomer.SecurityGroup)
+            };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtProperties.Key));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);

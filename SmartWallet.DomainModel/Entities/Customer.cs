@@ -9,6 +9,7 @@
         public string Password { get; set; }
         public bool IsActive { get; set; }
         public DateTime CreationDate { get; set; }
+        public string SecurityGroup { get; set; }
         public List<Wallet>? Wallets { get; set; }
     }
 }

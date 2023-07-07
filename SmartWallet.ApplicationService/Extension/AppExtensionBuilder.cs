@@ -28,6 +28,7 @@ namespace SmartWallet.ApplicationService.Extension
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtProperties.Key)),
                     ValidateIssuer = true,
+                    ValidAlgorithms = new List<string> { SecurityAlgorithms.HmacSha512 },
                     ValidateAudience = false,
                     ValidateLifetime = true,
                     ValidIssuer = jwtProperties.Issuer,

@@ -19,15 +19,5 @@
             app.MapControllers();
             return app;
         }
-
-        private static bool IsAppInDebug()
-        {
-            #if DEBUG
-            return true;
-            #else
-            return false;
-            #endif
-
-        }
     }
 }

@@ -1,8 +1,6 @@
 ﻿using SmartWallet.ApplicationService.Contracts;
 using SmartWallet.Infrastructure.DataModels;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
 
 namespace SmartWallet.API.Controllers
 {
@@ -21,11 +19,20 @@ namespace SmartWallet.API.Controllers
         [HttpGet(Name = "GetCustomers")]
         public async Task<IActionResult> GetCustomers()
         {
-            if (ValidateToken())
+            try
             {
-                return Ok(await _appService.GetCustomers());
+                if (Request.Cookies.TryGetValue("jwt", out var jwtToken))
+                {
+                    if (_appService.CheckJwtAuthentication(jwtToken))
+                    {
+                        return Ok(await _appService.GetCustomers());
+                    }
+                    return Unauthorized();
+
+                }
+                return Unauthorized();
             }
-            else
+            catch
             {
                 return Unauthorized();
             }
@@ -34,11 +41,20 @@ namespace SmartWallet.API.Controllers
         [HttpGet("{id}", Name = "GetCustomer")]
         public async Task<IActionResult> GetCustomer(int id)
         {
-            if (ValidateToken())
+            try
             {
-                return Ok(await _appService.GetCustomer(id));
+                if (Request.Cookies.TryGetValue("jwt", out var jwtToken))
+                {
+                    if (_appService.CheckJwtAuthentication(jwtToken))
+                    {
+                        return Ok(await _appService.GetCustomer(id));
+                    }
+                    return Unauthorized();
+
+                }
+                return Unauthorized();
             }
-            else
+            catch
             {
                 return Unauthorized();
             }
@@ -47,24 +63,26 @@ namespace SmartWallet.API.Controllers
         [HttpPost(Name = "InsertCustomer")]
         public async Task<ActionResult<Customer>> InsertCustomer(Customer customer)
         {
-            if (ValidateToken())
-            {
-                return Ok(await _appService.InsertCustomer(customer));
-            }
-            else
-            {
-                return Unauthorized();
-            }
+            return Ok(await _appService.InsertCustomer(customer));
         }
 
         [HttpDelete("{id}", Name = "DeleteCustomer")]
         public async Task<ActionResult<Customer>> DeleteCustomer(int id)
         {
-            if (ValidateToken())
+            try
             {
-                return Ok(await _appService.DeleteCustomer(id));
+                if (Request.Cookies.TryGetValue("jwt", out var jwtToken))
+                {
+                    if (_appService.CheckJwtAuthentication(jwtToken))
+                    {
+                        return Ok(await _appService.DeleteCustomer(id));
+                    }
+                    return Unauthorized();
+
+                }
+                return Unauthorized();
             }
-            else
+            catch
             {
                 return Unauthorized();
             }
@@ -73,40 +91,55 @@ namespace SmartWallet.API.Controllers
         [HttpPut(Name = "UpdateStudent")]
         public async Task<ActionResult<Customer>> UpdateCustomer([FromBody] Customer newCustomer)
         {
-            if (ValidateToken())
+            try
             {
-                return Ok(await _appService.UpdateCustomer(newCustomer));
+                if (Request.Cookies.TryGetValue("jwt", out var jwtToken))
+                {
+                    if (_appService.CheckJwtAuthentication(jwtToken))
+                    {
+                        return Ok(await _appService.UpdateCustomer(newCustomer));
+                    }
+                    return Unauthorized();
+
+                }
+                return Unauthorized();
             }
-            else
+            catch
             {
                 return Unauthorized();
             }
         }
 
-        //#if DEBUG
+        // For debugging purposes.
         [HttpDelete(Name = "RestoreDB")]
         public async Task<ActionResult> RestoreDB()
         {
-            if (ValidateToken())
+            try
             {
-                await _appService.RestoreDB();
-                return Ok("DB Restored");
+                if (Request.Cookies.TryGetValue("jwt", out var jwtToken))
+                {
+                    if (_appService.CheckJwtAuthentication(jwtToken))
+                    {
+                        await _appService.RestoreDB();
+                        return Ok("DB Restored");
+                    }
+                    return Unauthorized();
+
+                }
+                return Unauthorized();
             }
-            else
+            catch
             {
                 return Unauthorized();
             }
         }
-        //# endif
 
-        // Log the user if credentials are ok
         [HttpPost("Login")]
         public async Task<IActionResult> Login(string givenEmail, string givenPassword)
         {
             var validatedCustomer = await _appService.VerifyCustomerLogin(givenEmail, givenPassword);
             if (validatedCustomer != null)
             {
-
                 var tokenString = _appService.GetTokenString(validatedCustomer);
 
                 // Add token to client cookie
@@ -117,7 +150,6 @@ namespace SmartWallet.API.Controllers
                     Secure = true,
                     Expires = DateTime.Now.AddDays(1)
                 });
-
                 return Ok(new { token = tokenString });
             }
             else
@@ -126,14 +158,34 @@ namespace SmartWallet.API.Controllers
             }
         }
 
-        [HttpGet("VerifyLogin")]
-        public bool ValidateToken()
+        [HttpGet("ValidateWebLogin")]
+        public IActionResult ValidateWebLogin()
         {
-            if (Request.Cookies.TryGetValue("jwt", out var jwtToken))
+            try
             {
-                return _appService.CheckJwtAuthentication(jwtToken);
+                if (Request.Cookies.TryGetValue("jwt", out var jwtToken))
+                {
+                    return Ok(_appService.CheckJwtAuthentication(jwtToken));
+                }
+                return Unauthorized("No session found");
             }
-            return false;
+            catch (Exception ex)
+            {
+                return Unauthorized(ex.Message);
+            }
         }
+
+        [HttpPost("Logout")]
+        public IActionResult Logout()
+        {
+            if (Request.Cookies.ContainsKey("jwt"))
+            {
+                Response.Cookies.Delete("jwt");
+                return Ok("Logout successful");
+            }
+
+            return BadRequest("No active session found");
+        }
+
     }
 }

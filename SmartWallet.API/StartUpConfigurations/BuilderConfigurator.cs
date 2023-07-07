@@ -19,8 +19,11 @@ namespace SmartWallet.API.StartUpConfigurations
             Builder.Services.AddEndpointsApiExplorer();
             Builder.Services.AddSwaggerGen();
 
-            var connectionString = Builder.Configuration.GetConnectionString("DefaultConnection");
-            Builder.Configuration.GetConnectionString("BasicAuth");
+            #if DEBUG
+            var connectionString = Builder.Configuration.GetConnectionString("MSSQL");
+            #else
+            var connectionString = Builder.Configuration.GetConnectionString("MySQL");
+            #endif
 
             Builder.Services.AddApplicationServices(connectionString);
 

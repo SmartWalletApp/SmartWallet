@@ -21,9 +21,10 @@ namespace SmartWallet.Infrastructure.Persistence
                 entity.Property(b => b.Name).IsRequired();
                 entity.Property(b => b.Surname).IsRequired();
                 entity.Property(b => b.Email).IsRequired();
+                entity.HasIndex(b => b.Email).IsUnique();
                 entity.Property(b => b.Password).IsRequired();
-                entity.Property(b => b.IsActive).IsRequired();
-                entity.Property(b => b.CreationDate).HasDefaultValueSql("CURRENT_TIMESTAMP");
+                entity.Property(b => b.IsActive).HasDefaultValue(true);
+                entity.Property(b => b.CreationDate).HasDefaultValue(DateTime.Now);
                 //entity.Property(b => b.Wallets).IsRequired(); // Navigation objects cannot be required
 
                 entity.HasMany(c => c.Wallets) // One customer has many wallets
@@ -37,8 +38,8 @@ namespace SmartWallet.Infrastructure.Persistence
             {
                 entity.HasKey(w => w.Id);
                 entity.Property(w => w.Id).ValueGeneratedOnAdd();
-                entity.Property(w => w.Balance).IsRequired();
-                //entity.Property(w => w.Coin).IsRequired(); // Navigation objects cannot be required
+                entity.Property(w => w.Balance).HasDefaultValue(0m);
+                //entity.Property(w => w.Coin).IsRequired();
                 //entity.Property(w => w.BalanceHistory).IsRequired(); // Navigation objects cannot be required
 
                 entity.HasOne(w => w.Coin);
@@ -56,7 +57,7 @@ namespace SmartWallet.Infrastructure.Persistence
                 entity.Property(b => b.Id).ValueGeneratedOnAdd();
                 entity.Property(b => b.Variation).IsRequired();
                 entity.Property(b => b.Category).IsRequired();
-                entity.Property(b => b.Date).IsRequired();
+                entity.Property(b => b.Date).HasDefaultValue(DateTime.Now);
                 entity.Property(b => b.Description).IsRequired();
             });
 

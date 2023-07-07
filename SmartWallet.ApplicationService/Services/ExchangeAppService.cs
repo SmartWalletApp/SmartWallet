@@ -86,9 +86,22 @@ namespace SmartWallet.ApplicationService.Services
         {
             _unitOfWork.EnsureDeleted();
             _unitOfWork.EnsureCreated();
+
+            #if DEBUG
+            var debugUser = InsertCustomer(new Customer
+            {
+                Name = "debug",
+                Surname = "debug",
+                Email = "debug",
+                Password = "debug",
+                IsActive = true
+            }).Result;
+            #endif
+
             ((UnitOfWork)_unitOfWork).CoinRepository.Insert(new Coin { Name = "USD", BuyValue = 0, SellValue = 0 });
             ((UnitOfWork)_unitOfWork).CoinRepository.Insert(new Coin { Name = "EUR", BuyValue = 0, SellValue = 0 });
             ((UnitOfWork)_unitOfWork).CoinRepository.Insert(new Coin { Name = "BTC", BuyValue = 0, SellValue = 0 });
+            
             _unitOfWork.Save();
             return Task.CompletedTask;
         }

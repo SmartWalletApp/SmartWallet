@@ -12,8 +12,13 @@ namespace SmartWallet.Infrastructure.Extension
     {
         public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, string? connectionString)
         {
+            #if DEBUG
+            services.AddDbContext<SmartWalletDbContext>(options =>
+                options.UseSqlServer(connectionString));
+            #else
             services.AddDbContext<SmartWalletDbContext>(options =>
                 options.UseMySql(connectionString, new MySqlServerVersion(new Version(10, 5, 19))));
+            #endif
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<ISmartWalletRepository<Coin>, SmartWalletRepository<Coin>>();

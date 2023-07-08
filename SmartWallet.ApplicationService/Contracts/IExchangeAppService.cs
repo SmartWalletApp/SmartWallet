@@ -1,25 +1,26 @@
-﻿using Microsoft.IdentityModel.Tokens;
-using SmartWallet.Infrastructure.DataModels;
+﻿using SmartWallet.ApplicationService.Dto.Request;
+using SmartWallet.ApplicationService.Dto.Response;
 
 namespace SmartWallet.ApplicationService.Contracts
 {
     public interface ISmartWalletAppService
     {
-        public Task<IEnumerable<Customer>> GetCustomers();
+        public Task<IEnumerable<CustomerResponseDto>> GetCustomers();
 
-        public Task<Customer> GetCustomer(int id);
+        public Task<CustomerResponseDto> GetCustomerById(int id);
+        public Task<CustomerResponseDto> GetCustomerByEmail(string email);
 
-        public Task<Customer> InsertCustomer(Customer customer);
+        public Task<CustomerResponseDto> InsertCustomer(CustomerRequestDto customer);
 
-        public Task<Customer> DeleteCustomer(int id);
+        public Task<CustomerResponseDto> DeleteCustomer(int id);
 
-        public Task<Customer> UpdateCustomer(Customer newCustomer);
+        public Task<CustomerResponseDto> UpdateCustomer(CustomerRequestDto newCustomer);
 
         public Task RestoreDB();
 
-        public Task<Customer> VerifyCustomerLogin(string givenEmail, string givenPassword);
+        public Task<CustomerResponseDto> VerifyCustomerLogin(string givenEmail, string givenPassword);
 
         Dictionary<string, string> GetTokenInfo(string? jwtToken);
-        string CreateToken(Customer validatedCustomer);
+        string CreateToken(CustomerResponseDto validatedCustomer);
     }
 }

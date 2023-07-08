@@ -7,6 +7,12 @@ using Microsoft.IdentityModel.Tokens;
 using SmartWallet.ApplicationService.JWT.Contracts;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using SmartWallet.ApplicationService.Dto.Response;
+using AutoMapper;
+using SmartWallet.ApplicationService.Dto.Request;
+using SmartWallet.DomainModel.Dto.Request;
+using Castle.Core.Resource;
+using SmartWallet.DomainModel.Entities.Response;
 
 namespace SmartWallet.ApplicationService.Services
 {
@@ -14,14 +20,16 @@ namespace SmartWallet.ApplicationService.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IJwtProperties _jwtProperties;
+        private readonly IMapper _mapper;
 
-        public SmartWalletAppService(IUnitOfWork unitOfWork, IJwtProperties jwtProperties)
+        public SmartWalletAppService(IUnitOfWork unitOfWork, IJwtProperties jwtProperties, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
             _jwtProperties = jwtProperties;
+            _mapper = mapper;
         }
 
-        public async Task<Customer> VerifyCustomerLogin(string givenEmail, string givenPassword)
+        public async Task<CustomerResponseDto> VerifyCustomerLogin(string givenEmail, string givenPassword)
         {
             var customerFound = await ((UnitOfWork)_unitOfWork).CustomerRepository.GetByEmail(givenEmail);
             if (customerFound != null)
@@ -30,29 +38,50 @@ namespace SmartWallet.ApplicationService.Services
                 {
                     if (VerifyPassword(givenPassword, customerFound.Password))
                     {
-                        return customerFound;
+                        var customerFoundResponseEntity = _mapper.Map<CustomerResponseEntity>(customerFound);
+                        var customerFoundResponseDto = _mapper.Map<CustomerResponseDto>(customerFoundResponseEntity);
+                        return customerFoundResponseDto;
                     }
                 }
             }
             return null;
         }
 
-        public async Task<IEnumerable<Customer>> GetCustomers()
+        public async Task<IEnumerable<CustomerResponseDto>> GetCustomers()
         {
-            return await ((UnitOfWork)_unitOfWork).CustomerRepository.GetAll();
+            var customers = await ((UnitOfWork)_unitOfWork).CustomerRepository.GetAll();
+            var customerResponseEntities = customers.Select(customer => _mapper.Map<CustomerResponseEntity>(customer)).ToList();
+            return customerResponseEntities.Select(customerResponseEntity => _mapper.Map<CustomerResponseDto>(customerResponseEntity)).ToList();
+            
         }
 
-        public async Task<Customer> GetCustomer(int id)
+        public async Task<CustomerResponseDto> GetCustomerById(int id)
         {
-            return await ((UnitOfWork)_unitOfWork).CustomerRepository.GetByID(id);
+            var customerFound = await ((UnitOfWork)_unitOfWork).CustomerRepository.GetByID(id);
+            var customerFoundResponseEntity = _mapper.Map<CustomerResponseEntity>(customerFound);
+            var customerFoundResponseDto = _mapper.Map<CustomerResponseDto>(customerFoundResponseEntity);
+
+            return customerFoundResponseDto;
         }
 
-        public async Task<Customer> InsertCustomer(Customer customer)
+        public async Task<CustomerResponseDto> GetCustomerByEmail(string email)
+        {
+            var customerFound = await ((UnitOfWork)_unitOfWork).CustomerRepository.GetByEmail(email);
+            var customerFoundResponseEntity = _mapper.Map<CustomerResponseEntity>(customerFound);
+            var customerFoundResponseDto = _mapper.Map<CustomerResponseDto>(customerFoundResponseEntity);
+
+            return customerFoundResponseDto;
+        }
+
+        public async Task<CustomerResponseDto> InsertCustomer(CustomerRequestDto newCustomer)
         {
             // Currently bcrypt will use Cost 11 (2048 iteratios) by default, which is around 140ms in debug using a Ryzen 5 3600X and DDR4 3200MHz RAM.
-            customer.Password = HashPassword(customer.Password);
+            newCustomer.Password = HashPassword(newCustomer.Password);
 
             var coins = await ((UnitOfWork)_unitOfWork).CoinRepository.GetAll();
+
+            var newCustomerEntity = _mapper.Map<CustomerRequestEntity>(newCustomer);
+            var customer = _mapper.Map<Customer>(newCustomerEntity);
 
             customer.Wallets = new List<Wallet>();
 
@@ -66,23 +95,36 @@ namespace SmartWallet.ApplicationService.Services
                 };
                 customer.Wallets.Add(wallet);
             }
-            var output = await ((UnitOfWork)_unitOfWork).CustomerRepository.Insert(customer);
+            var customerInserted = await ((UnitOfWork)_unitOfWork).CustomerRepository.Insert(customer);
             _unitOfWork.Save();
-            return output;
+            var customerInsertedResponseEntity = _mapper.Map<CustomerResponseEntity>(customerInserted);
+            var customerInsertedResponseDto = _mapper.Map<CustomerResponseDto>(customerInsertedResponseEntity);
+            return customerInsertedResponseDto;
         }
 
-        public async Task<Customer> DeleteCustomer(int id)
+        public async Task<CustomerResponseDto> DeleteCustomer(int id)
         {
-            var output = await ((UnitOfWork)_unitOfWork).CustomerRepository.Delete(id);
+            var customerDeleted = await ((UnitOfWork)_unitOfWork).CustomerRepository.Delete(id);
             _unitOfWork.Save();
-            return output;
+            var customerDeletedResponseEntity = _mapper.Map<CustomerResponseEntity>(customerDeleted);
+            var customerDeletedResponseDto = _mapper.Map<CustomerResponseDto>(customerDeletedResponseEntity);
+
+            return customerDeletedResponseDto;
         }
 
-        public async Task<Customer> UpdateCustomer(Customer newCustomer)
+        public async Task<CustomerResponseDto> UpdateCustomer(CustomerRequestDto newCustomer)
         {
-            var output = await ((UnitOfWork)_unitOfWork).CustomerRepository.Update(newCustomer);
+            var newCustomerEntity = _mapper.Map<CustomerRequestEntity>(newCustomer);
+            var customer = _mapper.Map<Customer>(newCustomerEntity);
+            customer.Password = HashPassword(newCustomer.Password);
+
+            var customerUpdated = await ((UnitOfWork)_unitOfWork).CustomerRepository.Update(customer);
             _unitOfWork.Save();
-            return output;
+
+            var customerUpdatedResponseEntity = _mapper.Map<CustomerResponseEntity>(customerUpdated);
+            var customerUpdatedResponseDto = _mapper.Map<CustomerResponseDto>(customerUpdatedResponseEntity);
+
+            return customerUpdatedResponseDto;
         }
 
         public Task RestoreDB()
@@ -91,13 +133,12 @@ namespace SmartWallet.ApplicationService.Services
             _unitOfWork.EnsureCreated();
 
             #if DEBUG
-            var debugUser = InsertCustomer(new Customer
+            var debugUser = InsertCustomer(new CustomerRequestDto
             {
                 Name = "admin",
                 Surname = "admin",
                 Email = "admin",
                 Password = "admin",
-                IsActive = true,
                 SecurityGroup = "admin"
             }).Result;
             #endif
@@ -145,16 +186,15 @@ namespace SmartWallet.ApplicationService.Services
                 return null;
             }
 
-            var jwtSecurityToken = validatedToken as JwtSecurityToken;
 
-            if (jwtSecurityToken != null)
+            if (validatedToken is JwtSecurityToken jwtSecurityToken)
             {
                 return jwtSecurityToken.Claims.ToDictionary(c => c.Type, c => c.Value);
             }
             return null;
         }
 
-        public string CreateToken(Customer validatedCustomer)
+        public string CreateToken(CustomerResponseDto validatedCustomer)
         {
             var claims = new[]
             {

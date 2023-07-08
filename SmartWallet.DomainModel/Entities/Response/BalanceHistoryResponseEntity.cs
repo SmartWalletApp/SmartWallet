@@ -1,6 +1,6 @@
-﻿namespace SmartWallet.ApplicationService.Dto.Response
+﻿namespace SmartWallet.DomainModel.Entities.Response
 {
-    public class BalanceHistoryResponseDto
+    public class BalanceHistoryResponseEntity
     {
         public int Id { get; set; }
         public decimal Variation { get; set; }

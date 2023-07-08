@@ -1,8 +1,7 @@
-﻿namespace SmartWallet.ApplicationService.Dto.Response
+﻿namespace SmartWallet.DomainModel.Dto.Request
 {
-    public class CoinResponseDto
+    public class CoinRequestEntity
     {
-        public int Id { get; set; }
         public string? Name { get; set; }
         public decimal BuyValue { get; set; }
         public decimal SellValue { get; set; }

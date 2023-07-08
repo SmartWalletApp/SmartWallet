@@ -1,6 +1,6 @@
-﻿namespace SmartWallet.ApplicationService.Dto.Request
+﻿namespace SmartWallet.DomainModel.Dto.Request
 {
-    public class CustomerRequestDto
+    public class CustomerRequestEntity
     {
         public string? Name { get; set; }
         public string? Surname { get; set; }

@@ -1,4 +1,5 @@
-﻿using SmartWallet.DomainModel.Persistence;
+﻿using SmartWallet.DomainModel.Entities.Response;
+using SmartWallet.DomainModel.Persistence;
 using SmartWallet.DomainModel.RepositoryContracts;
 using SmartWallet.Infrastructure.DataModels;
 

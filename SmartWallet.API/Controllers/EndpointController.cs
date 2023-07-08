@@ -1,6 +1,7 @@
 ﻿using SmartWallet.ApplicationService.Contracts;
 using SmartWallet.Infrastructure.DataModels;
 using Microsoft.AspNetCore.Mvc;
+using SmartWallet.ApplicationService.Dto.Request;
 
 namespace SmartWallet.API.Controllers
 {
@@ -41,7 +42,7 @@ namespace SmartWallet.API.Controllers
         }
 
         [HttpGet("{id}", Name = "GetCustomer")]
-        public async Task<IActionResult> GetCustomer()
+        public async Task<IActionResult> GetCustomer(int id)
         {
             try
             {
@@ -50,8 +51,8 @@ namespace SmartWallet.API.Controllers
                     var claims = _appService.GetTokenInfo(jwtToken);
                     if (claims != null)
                     {
-                        int clientId = Int32.Parse(claims["id"]);
-                        return Ok(await _appService.GetCustomer(clientId));
+                        int clientId = int.Parse(claims["id"]);
+                        return Ok(await _appService.GetCustomerById(id));
                     }
                 }
                 return Unauthorized();
@@ -63,13 +64,13 @@ namespace SmartWallet.API.Controllers
         }
 
         [HttpPost(Name = "InsertCustomer")]
-        public async Task<ActionResult<Customer>> InsertCustomer(Customer customer)
+        public async Task<ActionResult<Customer>> InsertCustomer(CustomerRequestDto customer)
         {
             return Ok(await _appService.InsertCustomer(customer));
         }
 
         [HttpDelete("{id}", Name = "DeleteCustomer")]
-        public async Task<ActionResult<Customer>> DeleteCustomer()
+        public async Task<ActionResult<Customer>> DeleteCustomer(int id)
         {
             try
             {
@@ -78,8 +79,10 @@ namespace SmartWallet.API.Controllers
                     var claims = _appService.GetTokenInfo(jwtToken);
                     if (claims != null)
                     {
-                        int clientId = Int32.Parse(claims["id"]);
-                        return Ok(await _appService.DeleteCustomer(clientId));
+                        int clientId = int.Parse(claims["id"]);
+                        if (id == clientId || claims["group"] == "admin")
+
+                            return Ok(await _appService.DeleteCustomer(id));
                     }
                 }
                 return Unauthorized();
@@ -91,7 +94,7 @@ namespace SmartWallet.API.Controllers
         }
 
         [HttpPut(Name = "UpdateStudent")]
-        public async Task<ActionResult<Customer>> UpdateCustomer([FromBody] Customer newCustomer)
+        public async Task<ActionResult<Customer>> UpdateCustomer([FromBody] CustomerRequestDto newCustomer)
         {
             try
             {
@@ -100,8 +103,9 @@ namespace SmartWallet.API.Controllers
                     var claims = _appService.GetTokenInfo(jwtToken);
                     if (claims != null)
                     {
-                        int clientId = Int32.Parse(claims["id"]);
-                        if (newCustomer.Id == clientId)
+                        var customerToChange = await _appService.GetCustomerByEmail(newCustomer.Email);
+                        int clientId = int.Parse(claims["id"]);
+                        if (customerToChange.Id == clientId || claims["group"] == "admin")
                         {
                             return Ok(await _appService.UpdateCustomer(newCustomer));
                         }
@@ -144,10 +148,11 @@ namespace SmartWallet.API.Controllers
         [HttpPost("Login")]
         public async Task<IActionResult> Login(string givenEmail, string givenPassword)
         {
-            var validatedCustomer = await _appService.VerifyCustomerLogin(givenEmail, givenPassword);
-            if (validatedCustomer != null)
+            var validatedCustomerDto = await _appService.VerifyCustomerLogin(givenEmail, givenPassword);
+
+            if (validatedCustomerDto != null)
             {
-                var tokenString = _appService.CreateToken(validatedCustomer);
+                var tokenString = _appService.CreateToken(validatedCustomerDto);
 
                 Response.Cookies.Append("jwt", tokenString, new CookieOptions
                 {
@@ -169,7 +174,7 @@ namespace SmartWallet.API.Controllers
         }
 
         [HttpGet("ValidateWebLogin")]
-        public async Task<IActionResult> ValidateWebLoginAsync()
+        public IActionResult ValidateWebLoginAsync()
         {
             try
             {

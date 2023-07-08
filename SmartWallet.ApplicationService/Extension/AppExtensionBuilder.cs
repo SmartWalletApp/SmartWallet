@@ -16,6 +16,8 @@ namespace SmartWallet.ApplicationService.Extension
         {
             var jwtProperties = JWTExtensionConfigurator.SetJWTProperties();
 
+            services.AddAutoMapper(typeof(AutoMapperProfile).Assembly);
+
             services.AddSingleton<IJwtProperties>(jwtProperties);
             services.AddAuthentication(opt =>
             {

@@ -1,6 +1,6 @@
-﻿namespace SmartWallet.Infrastructure.DataModels
+﻿namespace SmartWallet.DomainModel.Entities.Response
 {
-    public class Customer
+    public class CustomerResponseEntity
     {
         public int Id { get; set; }
         public string? Name { get; set; }
@@ -10,6 +10,6 @@
         public bool IsActive { get; set; }
         public DateTime CreationDate { get; set; }
         public string? SecurityGroup { get; set; }
-        public List<Wallet>? Wallets { get; set; }
+        public List<WalletResponseEntity>? Wallets { get; set; }
     }
 }

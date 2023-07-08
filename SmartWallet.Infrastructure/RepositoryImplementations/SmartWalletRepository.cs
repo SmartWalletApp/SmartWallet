@@ -2,6 +2,7 @@
 using SmartWallet.DomainModel.RepositoryContracts;
 using SmartWallet.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using AutoMapper;
 
 namespace SmartWallet.Infrastructure.RepositoryImplementations
 {
@@ -9,11 +10,13 @@ namespace SmartWallet.Infrastructure.RepositoryImplementations
     {
         protected readonly SmartWalletDbContext _context;
         protected DbSet<T> EntitySet;
+        protected readonly IMapper _mapper;
 
-        public SmartWalletRepository(SmartWalletDbContext context)
+        public SmartWalletRepository(SmartWalletDbContext context, IMapper mapper)
         {
             _context = context;
             EntitySet = _context.Set<T>();
+            _mapper = mapper;
         }
 
         public virtual async Task<IEnumerable<T>> GetAll()

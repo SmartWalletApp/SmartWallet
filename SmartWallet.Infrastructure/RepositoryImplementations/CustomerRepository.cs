@@ -1,8 +1,8 @@
-﻿using SmartWallet.DomainModel.Persistence;
-using SmartWallet.Infrastructure.DataModels;
+﻿using SmartWallet.Infrastructure.DataModels;
 using SmartWallet.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using AutoMapper;
+using SmartWallet.DomainModel.RepositoryContracts;
 
 namespace SmartWallet.Infrastructure.RepositoryImplementations
 {
@@ -14,7 +14,7 @@ namespace SmartWallet.Infrastructure.RepositoryImplementations
 
         public async Task<Customer> GetByEmail(string email)
         {
-            return await EntitySet.FirstAsync(x => x.Email == email);
+            return await EntitySet.FirstOrDefaultAsync(x => x.Email == email);
         }
         public override async Task<IEnumerable<Customer>> GetAll() =>
             await EntitySet.Include(c => c.Wallets)
@@ -30,9 +30,9 @@ namespace SmartWallet.Infrastructure.RepositoryImplementations
                 .ThenInclude(w => w.BalanceHistory)
                 .FirstOrDefaultAsync(c => c.Id == Id);
 
-        public override Task<Customer> Update(Customer customer)
+        public async override Task<Customer> Update(Customer customer)
         {
-            var existingCustomer = EntitySet.FirstOrDefault(c => c.Email == customer.Email);
+            var existingCustomer = await EntitySet.FirstOrDefaultAsync(c => c.Email == customer.Email);
 
             if(existingCustomer != null)
             {
@@ -41,7 +41,7 @@ namespace SmartWallet.Infrastructure.RepositoryImplementations
                 existingCustomer.Password = customer.Password;
                 existingCustomer.SecurityGroup = customer.SecurityGroup;
             }
-            return Task.FromResult(existingCustomer);
+            return existingCustomer;
         }
     }
 }

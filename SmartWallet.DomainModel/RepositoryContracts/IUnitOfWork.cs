@@ -1,7 +1,4 @@
-﻿using SmartWallet.DomainModel.Entities;
-using SmartWallet.DomainModel.Persistence;
-
-namespace SmartWallet.DomainModel.RepositoryContracts
+﻿namespace SmartWallet.DomainModel.RepositoryContracts
 {
     public interface IUnitOfWork
     {

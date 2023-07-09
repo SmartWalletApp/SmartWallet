@@ -1,6 +1,4 @@
-﻿using SmartWallet.DomainModel.RepositoryContracts;
-
-namespace SmartWallet.DomainModel.Persistence
+﻿namespace SmartWallet.DomainModel.RepositoryContracts
 {
     public interface ICustomerRepository<T> : ISmartWalletRepository<T> where T : class
     {

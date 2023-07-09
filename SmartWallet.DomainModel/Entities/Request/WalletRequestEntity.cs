@@ -3,6 +3,6 @@
     public class WalletRequestEntity
     {
         public decimal Balance { get; set; }
-        public CoinRequestEntity? Coin { get; set; }
+        public CoinRequestEntity Coin { get; set; }
     }
 }

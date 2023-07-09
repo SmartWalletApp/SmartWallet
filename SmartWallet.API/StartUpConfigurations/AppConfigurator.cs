@@ -1,4 +1,7 @@
-﻿namespace SmartWallet.API.StartUpConfigurations
+﻿using SmartWallet.ApplicationService.Contracts;
+using SmartWallet.DomainModel.RepositoryContracts;
+
+namespace SmartWallet.API.StartUpConfigurations
 {
     public class AppConfigurator
     {
@@ -10,6 +13,15 @@
         public static WebApplication BuildApp(WebApplicationBuilder builder)
         {
             var app = builder.Build();
+
+            // Run database restoration if it doesn't exist
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                var unitOfWork = services.GetRequiredService<IUnitOfWork>();
+                unitOfWork.EnsureCreated();
+                unitOfWork.Save();
+            }
 
             app.UseSwagger();
             app.UseSwaggerUI();

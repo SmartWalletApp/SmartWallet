@@ -12,7 +12,7 @@ namespace SmartWallet.ApplicationService.Extension
 {
     public static class AppExtensionBuilder
     {
-        public static IServiceCollection AddApplicationServices(this IServiceCollection services, string? connectionString)
+        public static IServiceCollection AddApplicationServices(this IServiceCollection services, string connectionString)
         {
             var jwtProperties = JWTExtensionConfigurator.SetJWTProperties();
 

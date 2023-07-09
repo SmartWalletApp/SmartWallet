@@ -1,5 +1,6 @@
 ﻿using SmartWallet.ApplicationService.Dto.Request;
 using SmartWallet.ApplicationService.Dto.Response;
+using SmartWallet.Infrastructure.DataModels;
 
 namespace SmartWallet.ApplicationService.Contracts
 {
@@ -8,7 +9,6 @@ namespace SmartWallet.ApplicationService.Contracts
         public Task<IEnumerable<CustomerResponseDto>> GetCustomers();
 
         public Task<CustomerResponseDto> GetCustomerById(int id);
-        public Task<CustomerResponseDto> GetCustomerByEmail(string email);
 
         public Task<CustomerResponseDto> InsertCustomer(CustomerRequestDto customer);
 
@@ -16,11 +16,20 @@ namespace SmartWallet.ApplicationService.Contracts
 
         public Task<CustomerResponseDto> UpdateCustomer(CustomerRequestDto newCustomer);
 
-        public Task RestoreDB();
+        public void RestoreDB();
 
         public Task<CustomerResponseDto> VerifyCustomerLogin(string givenEmail, string givenPassword);
 
-        Dictionary<string, string> GetTokenInfo(string? jwtToken);
+        public Dictionary<string, string> GetTokenClaims(string jwtToken);
+
         string CreateToken(CustomerResponseDto validatedCustomer);
+
+        public Task<CustomerResponseDto> AddWallet(int clientId, string coin);
+
+        public Task<Coin> AddCoin(string coin);
+
+        public Task<IEnumerable<Coin>> GetCoins();
+
+        public Task<CustomerResponseDto> RemoveWallet(int clientId, string coin);
     }
 }

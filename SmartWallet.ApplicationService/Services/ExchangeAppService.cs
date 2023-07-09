@@ -11,7 +11,6 @@ using SmartWallet.ApplicationService.Dto.Response;
 using AutoMapper;
 using SmartWallet.ApplicationService.Dto.Request;
 using SmartWallet.DomainModel.Dto.Request;
-using Castle.Core.Resource;
 using SmartWallet.DomainModel.Entities.Response;
 
 namespace SmartWallet.ApplicationService.Services
@@ -29,44 +28,60 @@ namespace SmartWallet.ApplicationService.Services
             _mapper = mapper;
         }
 
-        public async Task<CustomerResponseDto> VerifyCustomerLogin(string givenEmail, string givenPassword)
+        public async Task<CustomerResponseDto> RemoveWallet(int clientId, string coin)
         {
-            var customerFound = await ((UnitOfWork)_unitOfWork).CustomerRepository.GetByEmail(givenEmail);
-            if (customerFound != null)
-            {
-                if (customerFound.IsActive)
-                {
-                    if (VerifyPassword(givenPassword, customerFound.Password))
-                    {
-                        var customerFoundResponseEntity = _mapper.Map<CustomerResponseEntity>(customerFound);
-                        var customerFoundResponseDto = _mapper.Map<CustomerResponseDto>(customerFoundResponseEntity);
-                        return customerFoundResponseDto;
-                    }
-                }
-            }
-            return null;
-        }
+            var customerFound = await ((UnitOfWork)_unitOfWork).CustomerRepository.GetByID(clientId);
+            if (customerFound == null) throw new Exception("Customer does not exist");
 
-        public async Task<IEnumerable<CustomerResponseDto>> GetCustomers()
-        {
-            var customers = await ((UnitOfWork)_unitOfWork).CustomerRepository.GetAll();
-            var customerResponseEntities = customers.Select(customer => _mapper.Map<CustomerResponseEntity>(customer)).ToList();
-            return customerResponseEntities.Select(customerResponseEntity => _mapper.Map<CustomerResponseDto>(customerResponseEntity)).ToList();
-            
-        }
+            var walletsToRemove = customerFound.Wallets.Find(x => x.Coin.Name == coin);
+            if (walletsToRemove == null) throw new Exception("No wallet with that coin found");
 
-        public async Task<CustomerResponseDto> GetCustomerById(int id)
-        {
-            var customerFound = await ((UnitOfWork)_unitOfWork).CustomerRepository.GetByID(id);
+            customerFound.Wallets.Remove(walletsToRemove);
+
+            _unitOfWork.Save();
+
             var customerFoundResponseEntity = _mapper.Map<CustomerResponseEntity>(customerFound);
             var customerFoundResponseDto = _mapper.Map<CustomerResponseDto>(customerFoundResponseEntity);
 
             return customerFoundResponseDto;
         }
 
-        public async Task<CustomerResponseDto> GetCustomerByEmail(string email)
+        public Task<IEnumerable<Coin>> GetCoins()
         {
-            var customerFound = await ((UnitOfWork)_unitOfWork).CustomerRepository.GetByEmail(email);
+            return ((UnitOfWork)_unitOfWork).CoinRepository.GetAll();
+        }
+
+        public async Task<CustomerResponseDto> VerifyCustomerLogin(string givenEmail, string givenPassword)
+        {
+            var customerFound = await ((UnitOfWork)_unitOfWork).CustomerRepository.GetByEmail(givenEmail);
+            if (customerFound == null) throw new Exception("Wrong user or password");
+            if (!customerFound.IsActive) throw new Exception("Customer is disabled");
+
+            if (VerifyPassword(givenPassword, customerFound.Password))
+            {
+                var customerFoundResponseEntity = _mapper.Map<CustomerResponseEntity>(customerFound);
+                var customerFoundResponseDto = _mapper.Map<CustomerResponseDto>(customerFoundResponseEntity);
+                return customerFoundResponseDto;
+            } else
+            {
+                throw new Exception("Wrong user or password");
+            }
+        }
+
+        public async Task<IEnumerable<CustomerResponseDto>> GetCustomers()
+        {
+            var customers = await ((UnitOfWork)_unitOfWork).CustomerRepository.GetAll();
+            if (!customers.Any()) throw new Exception("No customers found");
+
+            var customerResponseEntities = customers.Select(customer => _mapper.Map<CustomerResponseEntity>(customer)).ToList();
+            return customerResponseEntities.Select(customerResponseEntity => _mapper.Map<CustomerResponseDto>(customerResponseEntity)).ToList();
+        }
+
+        public async Task<CustomerResponseDto> GetCustomerById(int id)
+        {
+            var customerFound = await ((UnitOfWork)_unitOfWork).CustomerRepository.GetByID(id);
+            if (customerFound == null) throw new Exception("Customer does not exist");
+
             var customerFoundResponseEntity = _mapper.Map<CustomerResponseEntity>(customerFound);
             var customerFoundResponseDto = _mapper.Map<CustomerResponseDto>(customerFoundResponseEntity);
 
@@ -96,6 +111,8 @@ namespace SmartWallet.ApplicationService.Services
                 customer.Wallets.Add(wallet);
             }
             var customerInserted = await ((UnitOfWork)_unitOfWork).CustomerRepository.Insert(customer);
+            if (customerInserted == null) throw new Exception("Failed to insert customer");
+
             _unitOfWork.Save();
             var customerInsertedResponseEntity = _mapper.Map<CustomerResponseEntity>(customerInserted);
             var customerInsertedResponseDto = _mapper.Map<CustomerResponseDto>(customerInsertedResponseEntity);
@@ -105,7 +122,10 @@ namespace SmartWallet.ApplicationService.Services
         public async Task<CustomerResponseDto> DeleteCustomer(int id)
         {
             var customerDeleted = await ((UnitOfWork)_unitOfWork).CustomerRepository.Delete(id);
+            if (customerDeleted == null) throw new Exception("Failed to delete customer");
+
             _unitOfWork.Save();
+
             var customerDeletedResponseEntity = _mapper.Map<CustomerResponseEntity>(customerDeleted);
             var customerDeletedResponseDto = _mapper.Map<CustomerResponseDto>(customerDeletedResponseEntity);
 
@@ -116,9 +136,12 @@ namespace SmartWallet.ApplicationService.Services
         {
             var newCustomerEntity = _mapper.Map<CustomerRequestEntity>(newCustomer);
             var customer = _mapper.Map<Customer>(newCustomerEntity);
+
             customer.Password = HashPassword(newCustomer.Password);
 
             var customerUpdated = await ((UnitOfWork)_unitOfWork).CustomerRepository.Update(customer);
+            if (customerUpdated == null) throw new Exception("Failed to update customer");
+
             _unitOfWork.Save();
 
             var customerUpdatedResponseEntity = _mapper.Map<CustomerResponseEntity>(customerUpdated);
@@ -127,28 +150,43 @@ namespace SmartWallet.ApplicationService.Services
             return customerUpdatedResponseDto;
         }
 
-        public Task RestoreDB()
+        public async Task<CustomerResponseDto> AddWallet(int clientId, string coin)
+        {
+            var customerFound = await((UnitOfWork)_unitOfWork).CustomerRepository.GetByID(clientId);
+            if (customerFound == null) throw new Exception("Customer does not exist");
+
+            if (customerFound.Wallets.FindAll(x => x.Coin.Name == coin).Count > 0) throw new Exception("Wallet already exists");
+
+            var coinFound = await ((UnitOfWork)_unitOfWork).CoinRepository.GetByName(coin);
+            if (coinFound == null) throw new Exception("Coin does not exist");
+
+            customerFound.Wallets.Add(new Wallet { Balance = 0m, BalanceHistory = new List<BalanceHistory>(), Coin = coinFound });
+
+            _unitOfWork.Save();
+
+            var customerFoundResponseEntity = _mapper.Map<CustomerResponseEntity>(customerFound);
+            var customerFoundResponseDto = _mapper.Map<CustomerResponseDto>(customerFoundResponseEntity);
+
+            return customerFoundResponseDto;
+        }
+
+        public async Task<Coin> AddCoin(string coin)
+        {
+            var newCoin = new Coin { Name = coin, BuyValue = 0, SellValue = 0 };
+            var returnedCoin = await ((UnitOfWork)_unitOfWork).CoinRepository.Insert(newCoin);
+            if (returnedCoin == null) throw new Exception("Failed to insert coin");
+
+            _unitOfWork.Save();
+
+            return returnedCoin;
+        }
+
+        public void RestoreDB()
         {
             _unitOfWork.EnsureDeleted();
             _unitOfWork.EnsureCreated();
-
-            #if DEBUG
-            var debugUser = InsertCustomer(new CustomerRequestDto
-            {
-                Name = "admin",
-                Surname = "admin",
-                Email = "admin",
-                Password = "admin",
-                SecurityGroup = "admin"
-            }).Result;
-            #endif
-
-            ((UnitOfWork)_unitOfWork).CoinRepository.Insert(new Coin { Name = "USD", BuyValue = 0, SellValue = 0 });
-            ((UnitOfWork)_unitOfWork).CoinRepository.Insert(new Coin { Name = "EUR", BuyValue = 0, SellValue = 0 });
-            ((UnitOfWork)_unitOfWork).CoinRepository.Insert(new Coin { Name = "BTC", BuyValue = 0, SellValue = 0 });
             
             _unitOfWork.Save();
-            return Task.CompletedTask;
         }
 
         private string HashPassword(string unhashedPass)
@@ -161,7 +199,7 @@ namespace SmartWallet.ApplicationService.Services
             return BCrypt.Net.BCrypt.Verify(unhashedText, hashedText);
         }
 
-        public Dictionary<string, string> GetTokenInfo(string? jwtToken)
+        public Dictionary<string, string> GetTokenClaims(string jwtToken)
         {
             var key = Encoding.UTF8.GetBytes(_jwtProperties.Key);
 
@@ -177,21 +215,15 @@ namespace SmartWallet.ApplicationService.Services
 
             var tokenHandler = new JwtSecurityTokenHandler();
             SecurityToken validatedToken;
-            try
-            {
-                tokenHandler.ValidateToken(jwtToken, validationParameters, out validatedToken);
-            }
-            catch
-            {
-                return null;
-            }
+            tokenHandler.ValidateToken(jwtToken, validationParameters, out validatedToken);
 
 
             if (validatedToken is JwtSecurityToken jwtSecurityToken)
             {
                 return jwtSecurityToken.Claims.ToDictionary(c => c.Type, c => c.Value);
             }
-            return null;
+
+            throw new Exception("Failed to get token info");
         }
 
         public string CreateToken(CustomerResponseDto validatedCustomer)

@@ -1,6 +1,4 @@
-﻿using SmartWallet.DomainModel.Entities.Response;
-using SmartWallet.DomainModel.Persistence;
-using SmartWallet.DomainModel.RepositoryContracts;
+﻿using SmartWallet.DomainModel.RepositoryContracts;
 using SmartWallet.Infrastructure.DataModels;
 
 namespace SmartWallet.Infrastructure.Persistence
@@ -10,12 +8,12 @@ namespace SmartWallet.Infrastructure.Persistence
         private readonly SmartWalletDbContext _context;
 
         public ICustomerRepository<Customer> CustomerRepository { get; }
-        public ISmartWalletRepository<Coin> CoinRepository { get; }
+        public ICoinRepository<Coin> CoinRepository { get; }
 
         public UnitOfWork(
             SmartWalletDbContext context,
             ICustomerRepository<Customer> customerRepository,
-            ISmartWalletRepository<Coin> coinRepository)
+            ICoinRepository<Coin> coinRepository)
         {
             _context = context;
             CustomerRepository = customerRepository;

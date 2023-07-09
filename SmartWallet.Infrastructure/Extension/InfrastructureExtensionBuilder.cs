@@ -1,5 +1,4 @@
-﻿using SmartWallet.DomainModel.Persistence;
-using SmartWallet.DomainModel.RepositoryContracts;
+﻿using SmartWallet.DomainModel.RepositoryContracts;
 using Microsoft.Extensions.DependencyInjection;
 using SmartWallet.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +9,7 @@ namespace SmartWallet.Infrastructure.Extension
 {
     public static class InfrastructureExtensionBuilder
     {
-        public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, string? connectionString)
+        public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, string connectionString)
         {
             #if DEBUG
             services.AddDbContext<SmartWalletDbContext>(options =>
@@ -22,8 +21,9 @@ namespace SmartWallet.Infrastructure.Extension
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<ISmartWalletRepository<Coin>, SmartWalletRepository<Coin>>();
-            services.AddScoped<ICustomerRepository<Customer>, CustomerRepository>();
             services.AddScoped<ISmartWalletRepository<BalanceHistory>, SmartWalletRepository<BalanceHistory>>();
+            services.AddScoped<ICustomerRepository<Customer>, CustomerRepository>();
+            services.AddScoped<ICoinRepository<Coin>, CoinRepository>();
             return services;
         }
     }

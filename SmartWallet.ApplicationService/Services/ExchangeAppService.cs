@@ -31,17 +31,15 @@ namespace SmartWallet.ApplicationService.Services
         public async Task<CustomerResponseDto> AddHistoric(int clientId, BalanceHistoryRequestDto historic, string coin)
         {
 
-            var customerFound = await ((UnitOfWork)_unitOfWork).CustomerRepository.GetByID(clientId);
-            if (customerFound == null) throw new Exception("Customer does not exist");
+            var customerFound = await ((UnitOfWork)_unitOfWork).CustomerRepository.GetByID(clientId) ?? throw new Exception("Customer does not exist");
 
-            var walletFound = customerFound.Wallets.Find(x => x.Coin.Name == coin);
-            if (walletFound == null) throw new Exception("Wallet with that name does not exist");
+            var walletFound = customerFound.Wallets.Find(x => x.Coin.Name == coin) ?? throw new Exception("Wallet with that name does not exist");
 
 
-            // Nestor
-            var newHistoricDataModel = _mapper.Map<BalanceHistory>(historic);
+            var newHistoricRequestEntity = _mapper.Map<BalanceHistoryRequestEntity>(historic);
+            var newHistoric = _mapper.Map<BalanceHistory>(newHistoricRequestEntity);
 
-            walletFound.BalanceHistory.Add(newHistoricDataModel);
+            walletFound.BalanceHistory.Add(newHistoric);
             _unitOfWork.Save();
 
             var customerFoundResponseEntity = _mapper.Map<CustomerResponseEntity>(customerFound);

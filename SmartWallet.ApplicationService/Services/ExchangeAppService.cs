@@ -28,6 +28,28 @@ namespace SmartWallet.ApplicationService.Services
             _mapper = mapper;
         }
 
+        public async Task<CustomerResponseDto> AddHistoric(int clientId, BalanceHistoryRequestDto historic, string coin)
+        {
+
+            var customerFound = await ((UnitOfWork)_unitOfWork).CustomerRepository.GetByID(clientId);
+            if (customerFound == null) throw new Exception("Customer does not exist");
+
+            var walletFound = customerFound.Wallets.Find(x => x.Coin.Name == coin);
+            if (walletFound == null) throw new Exception("Wallet with that name does not exist");
+
+
+            // Nestor
+            var newHistoricDataModel = _mapper.Map<BalanceHistory>(historic);
+
+            walletFound.BalanceHistory.Add(newHistoricDataModel);
+            _unitOfWork.Save();
+
+            var customerFoundResponseEntity = _mapper.Map<CustomerResponseEntity>(customerFound);
+            var customerFoundResponseDto = _mapper.Map<CustomerResponseDto>(customerFoundResponseEntity);
+
+            return customerFoundResponseDto;
+        }
+
         public async Task<CustomerResponseDto> RemoveWallet(int clientId, string coin)
         {
             var customerFound = await ((UnitOfWork)_unitOfWork).CustomerRepository.GetByID(clientId);
@@ -249,5 +271,6 @@ namespace SmartWallet.ApplicationService.Services
 
             return tokenHandler.WriteToken(token);
         }
+
     }
 }

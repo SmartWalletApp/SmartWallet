@@ -22,7 +22,7 @@ namespace SmartWallet.API.Controllers
         {
             try
             {
-                if (Request.Cookies.TryGetValue("jwt", out var jwtToken))
+                if (Request.Headers.TryGetValue("Authorization", out var jwtToken))
                 {
                     var claims = _appService.GetTokenClaims(jwtToken);
                     if (claims["group"] == "admin")
@@ -43,7 +43,7 @@ namespace SmartWallet.API.Controllers
         {
             try
             {
-                if (Request.Cookies.TryGetValue("jwt", out var jwtToken))
+                if (Request.Headers.TryGetValue("Authorization", out var jwtToken))
                 {
                     var claims = _appService.GetTokenClaims(jwtToken);
                     if (claims["group"] == "admin")
@@ -64,7 +64,7 @@ namespace SmartWallet.API.Controllers
         {
             try
             {
-                if (Request.Cookies.TryGetValue("jwt", out var jwtToken))
+                if (Request.Headers.TryGetValue("Authorization", out var jwtToken))
                 {
                     var claims = _appService.GetTokenClaims(jwtToken);
                     if (claims["group"] == "admin")
@@ -85,7 +85,7 @@ namespace SmartWallet.API.Controllers
         {
             try
             {
-                if (Request.Cookies.TryGetValue("jwt", out var jwtToken))
+                if (Request.Headers.TryGetValue("Authorization", out var jwtToken))
                 {
                     var claims = _appService.GetTokenClaims(jwtToken);
                     if (claims["group"] == "admin")
@@ -106,7 +106,7 @@ namespace SmartWallet.API.Controllers
         {
             try
             {
-                if (Request.Cookies.TryGetValue("jwt", out var jwtToken))
+                if (Request.Headers.TryGetValue("Authorization", out var jwtToken))
                 {
                     var claims = _appService.GetTokenClaims(jwtToken);
                     if (claims["group"] == "admin")
@@ -128,7 +128,7 @@ namespace SmartWallet.API.Controllers
         {
             try
             {
-                if (Request.Cookies.TryGetValue("jwt", out var jwtToken))
+                if (Request.Headers.TryGetValue("Authorization", out var jwtToken))
                 {
                     var claims = _appService.GetTokenClaims(jwtToken);
                     if (claims["group"] == "admin")

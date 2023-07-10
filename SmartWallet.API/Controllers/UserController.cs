@@ -22,7 +22,7 @@ namespace SmartWallet.API.Controllers
         {
             try
             {
-                if (Request.Cookies.TryGetValue("jwt", out var jwtToken))
+                if (Request.Headers.TryGetValue("Authorization", out var jwtToken))
                 {
                     var claims = _appService.GetTokenClaims(jwtToken);
                     return Ok(await _appService.GetCoins());
@@ -40,7 +40,7 @@ namespace SmartWallet.API.Controllers
         {
             try
             {
-                if (Request.Cookies.TryGetValue("jwt", out var jwtToken))
+                if (Request.Headers.TryGetValue("Authorization", out var jwtToken))
                 {
                     var claims = _appService.GetTokenClaims(jwtToken);
                     int clientId = int.Parse(claims["id"]);
@@ -72,11 +72,30 @@ namespace SmartWallet.API.Controllers
         {
             try
             {
-                if (Request.Cookies.TryGetValue("jwt", out var jwtToken))
+                if (Request.Headers.TryGetValue("Authorization", out var jwtToken))
                 {
                     var claims = _appService.GetTokenClaims(jwtToken);
                     int clientId = int.Parse(claims["id"]);
                     return Ok(await _appService.AddWallet(clientId, coin));
+                }
+                return Unauthorized();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("AddHistoric/{coin}", Name = "AddHistoric")]
+        public async Task<ActionResult<Customer>> AddHistoric([FromBody] BalanceHistoryRequestDto historic, string coin)
+        {
+            try
+            {
+                if (Request.Headers.TryGetValue("Authorization", out var jwtToken))
+                {
+                    var claims = _appService.GetTokenClaims(jwtToken);
+                    int clientId = int.Parse(claims["id"]);
+                    return Ok(await _appService.AddHistoric(clientId, historic, coin));
                 }
                 return Unauthorized();
             }
@@ -91,7 +110,7 @@ namespace SmartWallet.API.Controllers
         {
             try
             {
-                if (Request.Cookies.TryGetValue("jwt", out var jwtToken))
+                if (Request.Headers.TryGetValue("Authorization", out var jwtToken))
                 {
                     var claims = _appService.GetTokenClaims(jwtToken);
                     int clientId = int.Parse(claims["id"]);
@@ -114,17 +133,14 @@ namespace SmartWallet.API.Controllers
 
                 var tokenString = _appService.CreateToken(validatedCustomerDto);
 
-                Response.Cookies.Append("jwt", tokenString, new CookieOptions
-                {
-                    HttpOnly = true,
-                    SameSite = SameSiteMode.Strict,
-                    Secure = true,
-                    #if DEBUG
-                    Expires = DateTime.Now.AddHours(6)
-                    #else
-                    Expires = DateTime.Now.AddMinutes(10)
-                    #endif
-                });
+                Response.Headers.Add("Authorization", tokenString);
+
+                #if DEBUG
+                Response.Headers.Add("Token-Expires", DateTime.Now.AddHours(6).ToString());
+                #else
+                Response.Headers.Add("Token-Expires", DateTime.Now.AddMinutes(10).ToString());
+                #endif
+
                 return Ok(new { token = tokenString });
             }
             catch (Exception ex)
@@ -139,7 +155,7 @@ namespace SmartWallet.API.Controllers
         {
             try
             {
-                if (Request.Cookies.TryGetValue("jwt", out var jwtToken))
+                if (Request.Headers.TryGetValue("Authorization", out var jwtToken))
                 {
                     var claims = _appService.GetTokenClaims(jwtToken);
                     return Ok(claims);
@@ -158,9 +174,9 @@ namespace SmartWallet.API.Controllers
         {
             try
             {
-                if (Request.Cookies.ContainsKey("jwt"))
+                if (Request.Headers.ContainsKey("Authorization"))
                 {
-                    Response.Cookies.Delete("jwt");
+                    Response.Headers.Remove("Authorization");
                     return Ok("Logout successful");
                 }
                 return BadRequest("No active session found");

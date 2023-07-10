@@ -31,5 +31,7 @@ namespace SmartWallet.ApplicationService.Contracts
         public Task<IEnumerable<Coin>> GetCoins();
 
         public Task<CustomerResponseDto> RemoveWallet(int clientId, string coin);
+
+        public Task<CustomerResponseDto> AddHistoric(int clientId, BalanceHistoryRequestDto historic, string coin);
     }
 }

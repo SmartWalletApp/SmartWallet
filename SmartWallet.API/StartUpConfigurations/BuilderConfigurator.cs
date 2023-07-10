@@ -29,6 +29,34 @@ namespace SmartWallet.API.StartUpConfigurations
                 options.AddServerHeader = false;
             });
 
+            Builder.Services.AddSwaggerGen(c =>
+            {
+                c.AddSecurityDefinition("JWTAuth", new OpenApiSecurityScheme
+                {
+                    Description = "JWT Authorization header. Enter your token in the text input below.",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "JWT"
+                });
+
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "JWTAuth"
+                            }
+                        },
+                        new string[] {}
+                    }
+                });
+            });
+
+
             #if DEBUG
             var connectionString = Builder.Configuration.GetConnectionString("MSSQL");
             #else

@@ -24,7 +24,7 @@ namespace SmartWallet.API.Controllers
             {
                 if (Request.Headers.TryGetValue("Authorization", out var jwtToken))
                 {
-                    var claims = _appService.GetTokenClaims(jwtToken);
+                    var claims = _appService.GetTokenClaims(jwtToken!);
                     return Ok(await _appService.GetCoins());
                 }
                 return Unauthorized();
@@ -42,7 +42,7 @@ namespace SmartWallet.API.Controllers
             {
                 if (Request.Headers.TryGetValue("Authorization", out var jwtToken))
                 {
-                    var claims = _appService.GetTokenClaims(jwtToken);
+                    var claims = _appService.GetTokenClaims(jwtToken!);
                     int clientId = int.Parse(claims["id"]);
                     return Ok(await _appService.GetCustomerById(clientId));
                 }
@@ -74,7 +74,7 @@ namespace SmartWallet.API.Controllers
             {
                 if (Request.Headers.TryGetValue("Authorization", out var jwtToken))
                 {
-                    var claims = _appService.GetTokenClaims(jwtToken);
+                    var claims = _appService.GetTokenClaims(jwtToken!);
                     int clientId = int.Parse(claims["id"]);
                     return Ok(await _appService.AddWallet(clientId, coin));
                 }
@@ -93,7 +93,7 @@ namespace SmartWallet.API.Controllers
             {
                 if (Request.Headers.TryGetValue("Authorization", out var jwtToken))
                 {
-                    var claims = _appService.GetTokenClaims(jwtToken);
+                    var claims = _appService.GetTokenClaims(jwtToken!);
                     int clientId = int.Parse(claims["id"]);
                     return Ok(await _appService.AddHistoric(clientId, historic, coin));
                 }
@@ -112,7 +112,7 @@ namespace SmartWallet.API.Controllers
             {
                 if (Request.Headers.TryGetValue("Authorization", out var jwtToken))
                 {
-                    var claims = _appService.GetTokenClaims(jwtToken);
+                    var claims = _appService.GetTokenClaims(jwtToken!);
                     int clientId = int.Parse(claims["id"]);
                     return Ok(await _appService.RemoveWallet(clientId, coin));
                 }
@@ -157,7 +157,7 @@ namespace SmartWallet.API.Controllers
             {
                 if (Request.Headers.TryGetValue("Authorization", out var jwtToken))
                 {
-                    var claims = _appService.GetTokenClaims(jwtToken);
+                    var claims = _appService.GetTokenClaims(jwtToken!);
                     return Ok(claims);
                 }
                 return Unauthorized();

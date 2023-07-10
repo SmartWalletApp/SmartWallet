@@ -3,6 +3,8 @@ using SmartWallet.DomainModel.RepositoryContracts;
 using SmartWallet.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using AutoMapper;
+using SmartWallet.Infrastructure.DataModels;
+using Microsoft.Identity.Client;
 
 namespace SmartWallet.Infrastructure.RepositoryImplementations
 {
@@ -26,7 +28,7 @@ namespace SmartWallet.Infrastructure.RepositoryImplementations
 
         public virtual async Task<T> GetByID(int Id)
         {
-            return await EntitySet.FindAsync(Id);
+            return await EntitySet.FindAsync(Id) ?? throw new InvalidOperationException($"{typeof(T)} not found");
         }
 
         public virtual async Task<T> Insert(T entity)
@@ -38,11 +40,15 @@ namespace SmartWallet.Infrastructure.RepositoryImplementations
         public virtual async Task<T> Delete(int ID)
         {
             var entryToDelete = await EntitySet.FindAsync(ID);
-            var entryRemoved = EntitySet.Remove(entryToDelete);
-            return entryRemoved.Entity;
+            if (entryToDelete != null)
+            {
+                var entryRemoved = EntitySet.Remove(entryToDelete);
+                return entryRemoved.Entity;
+            }
+            throw new InvalidOperationException();
         }
 
-        public virtual async Task<T> Update(T entity)
+        public virtual T Update(T entity)
         {
             var entryUpdated = EntitySet.Update(entity);
             return entryUpdated.Entity;

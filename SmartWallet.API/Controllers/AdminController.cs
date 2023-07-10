@@ -24,7 +24,7 @@ namespace SmartWallet.API.Controllers
             {
                 if (Request.Headers.TryGetValue("Authorization", out var jwtToken))
                 {
-                    var claims = _appService.GetTokenClaims(jwtToken);
+                    var claims = _appService.GetTokenClaims(jwtToken!);
                     if (claims["group"] == "admin")
                     {
                         return Ok(await _appService.AddCoin(coin));
@@ -45,7 +45,7 @@ namespace SmartWallet.API.Controllers
             {
                 if (Request.Headers.TryGetValue("Authorization", out var jwtToken))
                 {
-                    var claims = _appService.GetTokenClaims(jwtToken);
+                    var claims = _appService.GetTokenClaims(jwtToken!);
                     if (claims["group"] == "admin")
                     {
                         return Ok(await _appService.GetCustomers());
@@ -66,7 +66,7 @@ namespace SmartWallet.API.Controllers
             {
                 if (Request.Headers.TryGetValue("Authorization", out var jwtToken))
                 {
-                    var claims = _appService.GetTokenClaims(jwtToken);
+                    var claims = _appService.GetTokenClaims(jwtToken!);
                     if (claims["group"] == "admin")
                     {
                         return Ok(await _appService.GetCustomerById(id));
@@ -87,7 +87,7 @@ namespace SmartWallet.API.Controllers
             {
                 if (Request.Headers.TryGetValue("Authorization", out var jwtToken))
                 {
-                    var claims = _appService.GetTokenClaims(jwtToken);
+                    var claims = _appService.GetTokenClaims(jwtToken!);
                     if (claims["group"] == "admin")
                     {
                         return Ok(await _appService.DeleteCustomer(id));
@@ -108,7 +108,7 @@ namespace SmartWallet.API.Controllers
             {
                 if (Request.Headers.TryGetValue("Authorization", out var jwtToken))
                 {
-                    var claims = _appService.GetTokenClaims(jwtToken);
+                    var claims = _appService.GetTokenClaims(jwtToken!);
                     if (claims["group"] == "admin")
                     {
                         var customerToChange = await _appService.GetCustomerById(id);
@@ -130,10 +130,10 @@ namespace SmartWallet.API.Controllers
             {
                 if (Request.Headers.TryGetValue("Authorization", out var jwtToken))
                 {
-                    var claims = _appService.GetTokenClaims(jwtToken);
+                    var claims = _appService.GetTokenClaims(jwtToken!);
                     if (claims["group"] == "admin")
                     {
-                        _appService.RestoreDB();
+                        await _appService.RestoreDB();
                         return Ok("DB Restored");
                     }
                 }

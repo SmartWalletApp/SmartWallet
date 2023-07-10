@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Server.Kestrel.Core;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Controllers;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.OpenApi.Models;
 using SmartWallet.ApplicationService.Extension;
 
 namespace SmartWallet.API.StartUpConfigurations
@@ -33,6 +36,8 @@ namespace SmartWallet.API.StartUpConfigurations
             #endif
 
             Builder.Services.AddApplicationServices(connectionString);
+
+            Builder.Services.AddControllers();
 
             return Builder;
         }

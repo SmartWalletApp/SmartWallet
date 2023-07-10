@@ -1,6 +1,12 @@
 using SmartWallet.API.StartUpConfigurations;
 
-var builder = new BuilderConfigurator(args).Builder;
-var app = new AppConfigurator(builder).App;
+internal class Program
+{
+    private static void Main(string[] args)
+    {
+        var builder = new BuilderConfigurator(args).Builder;
+        var app = new AppConfigurator(builder).App;
 
-app.Run();
+        app.Run();
+    }
+}

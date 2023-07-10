@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Controllers;
-using Microsoft.AspNetCore.Server.Kestrel.Core;
+﻿using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.OpenApi.Models;
 using SmartWallet.ApplicationService.Extension;
 
@@ -51,7 +49,7 @@ namespace SmartWallet.API.StartUpConfigurations
                                 Id = "JWTAuth"
                             }
                         },
-                        new string[] {}
+                        Array.Empty<string>()
                     }
                 });
             });
@@ -63,7 +61,7 @@ namespace SmartWallet.API.StartUpConfigurations
             var connectionString = Builder.Configuration.GetConnectionString("MySQL");
             #endif
 
-            Builder.Services.AddApplicationServices(connectionString);
+            Builder.Services.AddApplicationServices(connectionString!);
 
             Builder.Services.AddControllers();
 

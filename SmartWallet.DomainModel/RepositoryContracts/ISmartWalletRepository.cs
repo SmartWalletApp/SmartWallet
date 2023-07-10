@@ -6,7 +6,6 @@
         Task<T> GetByID(int Id);
         Task<T> Insert(T entity);
         Task<T> Delete(int ID);
-        Task<T> Update(T entity);
     }
 
 }

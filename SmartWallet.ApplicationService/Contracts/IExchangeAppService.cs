@@ -16,7 +16,7 @@ namespace SmartWallet.ApplicationService.Contracts
 
         public Task<CustomerResponseDto> UpdateCustomer(CustomerRequestDto newCustomer);
 
-        public void RestoreDB();
+        public Task RestoreDB();
 
         public Task<CustomerResponseDto> VerifyCustomerLogin(string givenEmail, string givenPassword);
 

@@ -12,6 +12,7 @@ using AutoMapper;
 using SmartWallet.ApplicationService.Dto.Request;
 using SmartWallet.DomainModel.Dto.Request;
 using SmartWallet.DomainModel.Entities.Response;
+using FluentValidation;
 
 namespace SmartWallet.ApplicationService.Services
 {
@@ -20,20 +21,36 @@ namespace SmartWallet.ApplicationService.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IJwtProperties _jwtProperties;
         private readonly IMapper _mapper;
+        private readonly IValidator<CustomerRequestDto> _customerValidator;
+        private readonly IValidator<CoinRequestDto> _coinValidator;
+        private readonly IValidator<BalanceHistoryRequestDto> _balanceHistoryValidator;
 
-        public SmartWalletAppService(IUnitOfWork unitOfWork, IJwtProperties jwtProperties, IMapper mapper)
+        public SmartWalletAppService(
+            IUnitOfWork unitOfWork,
+            IJwtProperties jwtProperties, 
+            IMapper mapper, 
+            IValidator<CustomerRequestDto> customerValidator,
+            IValidator<CoinRequestDto> coinValidator,
+            IValidator<BalanceHistoryRequestDto> balanceHistoryValidator
+            )
         {
             _unitOfWork = unitOfWork;
             _jwtProperties = jwtProperties;
             _mapper = mapper;
+            _customerValidator = customerValidator;
+            _coinValidator = coinValidator;
+            _balanceHistoryValidator = balanceHistoryValidator;
         }
 
         public async Task<CustomerResponseDto> AddHistoric(int clientId, BalanceHistoryRequestDto historic, string coin)
         {
+            var validationResult = _balanceHistoryValidator.Validate(historic);
+
+            if (!validationResult.IsValid) throw new FormatException(string.Join("\n", validationResult.Errors.Select(x => x.ErrorMessage).ToList()));
 
             var customerFound = await ((UnitOfWork)_unitOfWork).CustomerRepository.GetByID(clientId) ?? throw new Exception("Customer does not exist");
 
-            var walletFound = customerFound.Wallets.Find(x => x.Coin.Name == coin) ?? throw new Exception("Wallet with that name does not exist");
+            var walletFound = customerFound.Wallets.Find(x => x.Coin.Name == coin) ?? throw new Exception("Wallet with that coin does not exist");
 
 
             var newHistoricRequestEntity = _mapper.Map<BalanceHistoryRequestEntity>(historic);
@@ -50,12 +67,8 @@ namespace SmartWallet.ApplicationService.Services
 
         public async Task<CustomerResponseDto> RemoveWallet(int clientId, string coin)
         {
-            var customerFound = await ((UnitOfWork)_unitOfWork).CustomerRepository.GetByID(clientId);
-            if (customerFound == null) throw new Exception("Customer does not exist");
-
-            var walletsToRemove = customerFound.Wallets.Find(x => x.Coin.Name == coin);
-            if (walletsToRemove == null) throw new Exception("No wallet with that coin found");
-
+            var customerFound = await ((UnitOfWork)_unitOfWork).CustomerRepository.GetByID(clientId) ?? throw new Exception("Customer does not exist");
+            var walletsToRemove = customerFound.Wallets.Find(x => x.Coin.Name == coin) ?? throw new Exception("No wallet with that coin found");
             customerFound.Wallets.Remove(walletsToRemove);
 
             _unitOfWork.Save();
@@ -73,8 +86,7 @@ namespace SmartWallet.ApplicationService.Services
 
         public async Task<CustomerResponseDto> VerifyCustomerLogin(string givenEmail, string givenPassword)
         {
-            var customerFound = await ((UnitOfWork)_unitOfWork).CustomerRepository.GetByEmail(givenEmail);
-            if (customerFound == null) throw new Exception("Wrong user or password");
+            var customerFound = await ((UnitOfWork)_unitOfWork).CustomerRepository.GetByEmail(givenEmail) ?? throw new Exception("Wrong user or password");
             if (!customerFound.IsActive) throw new Exception("Customer is disabled");
 
             if (VerifyPassword(givenPassword, customerFound.Password))
@@ -99,9 +111,7 @@ namespace SmartWallet.ApplicationService.Services
 
         public async Task<CustomerResponseDto> GetCustomerById(int id)
         {
-            var customerFound = await ((UnitOfWork)_unitOfWork).CustomerRepository.GetByID(id);
-            if (customerFound == null) throw new Exception("Customer does not exist");
-
+            var customerFound = await ((UnitOfWork)_unitOfWork).CustomerRepository.GetByID(id) ?? throw new Exception("Customer does not exist");
             var customerFoundResponseEntity = _mapper.Map<CustomerResponseEntity>(customerFound);
             var customerFoundResponseDto = _mapper.Map<CustomerResponseDto>(customerFoundResponseEntity);
 
@@ -110,6 +120,9 @@ namespace SmartWallet.ApplicationService.Services
 
         public async Task<CustomerResponseDto> InsertCustomer(CustomerRequestDto newCustomer)
         {
+            var validationResult = _customerValidator.Validate(newCustomer);
+            
+            if(!validationResult.IsValid) throw new FormatException(string.Join("\n", validationResult.Errors.Select(x => x.ErrorMessage).ToList()));
             // Currently bcrypt will use Cost 11 (2048 iteratios) by default, which is around 140ms in debug using a Ryzen 5 3600X and DDR4 3200MHz RAM.
             newCustomer.Password = HashPassword(newCustomer.Password);
 
@@ -130,9 +143,7 @@ namespace SmartWallet.ApplicationService.Services
                 };
                 customer.Wallets.Add(wallet);
             }
-            var customerInserted = await ((UnitOfWork)_unitOfWork).CustomerRepository.Insert(customer);
-            if (customerInserted == null) throw new Exception("Failed to insert customer");
-
+            var customerInserted = await ((UnitOfWork)_unitOfWork).CustomerRepository.Insert(customer) ?? throw new Exception("Failed to insert customer");
             _unitOfWork.Save();
             var customerInsertedResponseEntity = _mapper.Map<CustomerResponseEntity>(customerInserted);
             var customerInsertedResponseDto = _mapper.Map<CustomerResponseDto>(customerInsertedResponseEntity);
@@ -141,9 +152,7 @@ namespace SmartWallet.ApplicationService.Services
 
         public async Task<CustomerResponseDto> DeleteCustomer(int id)
         {
-            var customerDeleted = await ((UnitOfWork)_unitOfWork).CustomerRepository.Delete(id);
-            if (customerDeleted == null) throw new Exception("Failed to delete customer");
-
+            var customerDeleted = await ((UnitOfWork)_unitOfWork).CustomerRepository.Delete(id) ?? throw new Exception("Failed to delete customer");
             _unitOfWork.Save();
 
             var customerDeletedResponseEntity = _mapper.Map<CustomerResponseEntity>(customerDeleted);
@@ -159,9 +168,7 @@ namespace SmartWallet.ApplicationService.Services
 
             customer.Password = HashPassword(newCustomer.Password);
 
-            var customerUpdated = await ((UnitOfWork)_unitOfWork).CustomerRepository.Update(customer);
-            if (customerUpdated == null) throw new Exception("Failed to update customer");
-
+            var customerUpdated = await ((UnitOfWork)_unitOfWork).CustomerRepository.UpdateAsync(customer) ?? throw new Exception("Failed to update customer");
             _unitOfWork.Save();
 
             var customerUpdatedResponseEntity = _mapper.Map<CustomerResponseEntity>(customerUpdated);
@@ -172,14 +179,10 @@ namespace SmartWallet.ApplicationService.Services
 
         public async Task<CustomerResponseDto> AddWallet(int clientId, string coin)
         {
-            var customerFound = await((UnitOfWork)_unitOfWork).CustomerRepository.GetByID(clientId);
-            if (customerFound == null) throw new Exception("Customer does not exist");
-
+            var customerFound = await((UnitOfWork)_unitOfWork).CustomerRepository.GetByID(clientId) ?? throw new Exception("Customer does not exist");
             if (customerFound.Wallets.FindAll(x => x.Coin.Name == coin).Count > 0) throw new Exception("Wallet already exists");
 
-            var coinFound = await ((UnitOfWork)_unitOfWork).CoinRepository.GetByName(coin);
-            if (coinFound == null) throw new Exception("Coin does not exist");
-
+            var coinFound = await ((UnitOfWork)_unitOfWork).CoinRepository.GetByName(coin) ?? throw new Exception("Coin does not exist");
             customerFound.Wallets.Add(new Wallet { Balance = 0m, BalanceHistory = new List<BalanceHistory>(), Coin = coinFound });
 
             _unitOfWork.Save();
@@ -190,31 +193,37 @@ namespace SmartWallet.ApplicationService.Services
             return customerFoundResponseDto;
         }
 
-        public async Task<Coin> AddCoin(string coin)
+        public async Task<Coin> AddCoin(string coinName)
         {
-            var newCoin = new Coin { Name = coin, BuyValue = 0, SellValue = 0 };
-            var returnedCoin = await ((UnitOfWork)_unitOfWork).CoinRepository.Insert(newCoin);
-            if (returnedCoin == null) throw new Exception("Failed to insert coin");
+            var newCoin = new CoinRequestDto { Name = coinName, BuyValue = 0, SellValue = 0 };
+            var validationResult = _coinValidator.Validate(newCoin);
 
+            if (!validationResult.IsValid) throw new FormatException(string.Join("\n", validationResult.Errors.Select(x => x.ErrorMessage).ToList()));
+
+            var newCoinResponseEntity = _mapper.Map<CoinRequestEntity>(newCoin);
+            var coin = _mapper.Map<Coin>(newCoinResponseEntity);
+
+            var returnedCoin = await ((UnitOfWork)_unitOfWork).CoinRepository.Insert(coin) ?? throw new Exception("Failed to insert coin");
             _unitOfWork.Save();
 
             return returnedCoin;
         }
 
-        public void RestoreDB()
+        public Task RestoreDB()
         {
             _unitOfWork.EnsureDeleted();
             _unitOfWork.EnsureCreated();
             
             _unitOfWork.Save();
+            return Task.CompletedTask;
         }
 
-        private string HashPassword(string unhashedPass)
+        private static string HashPassword(string unhashedPass)
         {
             // Currently bcrypt will use Cost 11 (2048 iteratios) by default, which is around 140ms in debug using a Ryzen 5 3600X and DDR4 3200MHz RAM.
             return BCrypt.Net.BCrypt.HashPassword(unhashedPass);
         }
-        private bool VerifyPassword(string unhashedText, string hashedText)
+        private static bool VerifyPassword(string unhashedText, string hashedText)
         {
             return BCrypt.Net.BCrypt.Verify(unhashedText, hashedText);
         }
@@ -234,8 +243,7 @@ namespace SmartWallet.ApplicationService.Services
             };
 
             var tokenHandler = new JwtSecurityTokenHandler();
-            SecurityToken validatedToken;
-            tokenHandler.ValidateToken(jwtToken, validationParameters, out validatedToken);
+            tokenHandler.ValidateToken(jwtToken, validationParameters, out SecurityToken validatedToken);
 
 
             if (validatedToken is JwtSecurityToken jwtSecurityToken)

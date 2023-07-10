@@ -7,6 +7,10 @@ using SmartWallet.ApplicationService.JWT.Contracts;
 using SmartWallet.API.StartUpConfigurations;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using FluentValidation;
+using SmartWallet.ApplicationService.Validators;
+using FluentValidation.AspNetCore;
+using SmartWallet.ApplicationService.Dto.Request;
 
 namespace SmartWallet.ApplicationService.Extension
 {
@@ -17,6 +21,11 @@ namespace SmartWallet.ApplicationService.Extension
             var jwtProperties = JWTExtensionConfigurator.SetJWTProperties();
 
             services.AddAutoMapper(typeof(AutoMapperProfile).Assembly);
+
+            services.AddFluentValidationAutoValidation();
+            services.AddScoped<IValidator<CustomerRequestDto>, CustomerValidator>();
+            services.AddScoped<IValidator<CoinRequestDto>, CoinValidator>();
+            services.AddScoped<IValidator<BalanceHistoryRequestDto>, BalanceHistoryValidator>();
 
             services.AddSingleton<IJwtProperties>(jwtProperties);
             services.AddAuthentication(opt =>

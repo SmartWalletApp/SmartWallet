@@ -27,7 +27,7 @@ namespace SmartWallet.Infrastructure.Persistence
                       .HasForeignKey(w => w.CoinId)
                       .OnDelete(DeleteBehavior.Restrict);
 
-                entity.HasMany(w => w.BalanceHistory)
+                entity.HasMany(w => w.BalanceHistorics)
                       .WithOne()
                       .HasForeignKey(bh => bh.WalletId)
                       .OnDelete(DeleteBehavior.Cascade);
@@ -35,7 +35,7 @@ namespace SmartWallet.Infrastructure.Persistence
                 entity.HasIndex(w => new { w.CustomerId, w.CoinId }).IsUnique();
             });
 
-            modelBuilder.Entity<BalanceHistory>(entity =>
+            modelBuilder.Entity<BalanceHistoric>(entity =>
             {
                 entity.HasKey(b => b.Id);
                 entity.Property(b => b.Id).ValueGeneratedOnAdd();
@@ -47,7 +47,7 @@ namespace SmartWallet.Infrastructure.Persistence
                 entity.Property(b => b.WalletId).IsRequired();
 
                 entity.HasOne(b => b.Wallet)
-                      .WithMany(w => w.BalanceHistory)
+                      .WithMany(w => w.BalanceHistorics)
                       .HasForeignKey(b => b.WalletId)
                       .OnDelete(DeleteBehavior.Cascade);
             });

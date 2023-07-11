@@ -11,10 +11,10 @@ namespace SmartWallet.ApplicationService.Extension
     {
         public AutoMapperProfile()
         {
-            CreateMap<BalanceHistoryRequestDto, BalanceHistoryRequestEntity>();
-            CreateMap<BalanceHistoryRequestEntity, BalanceHistory>();            
-            CreateMap<BalanceHistory, BalanceHistoryResponseEntity>();
-            CreateMap<BalanceHistoryResponseEntity, BalanceHistoryResponseDto>();
+            CreateMap<BalanceHistoricRequestDto, BalanceHistoricRequestEntity>();
+            CreateMap<BalanceHistoricRequestEntity, BalanceHistoric>();            
+            CreateMap<BalanceHistoric, BalanceHistoricResponseEntity>();
+            CreateMap<BalanceHistoricResponseEntity, BalanceHistoricResponseDto>();
 
             CreateMap<CoinRequestDto, CoinRequestEntity>();
             CreateMap<CoinRequestEntity, Coin>();            

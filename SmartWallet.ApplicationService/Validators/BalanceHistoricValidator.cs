@@ -3,9 +3,9 @@ using FluentValidation;
 
 namespace SmartWallet.ApplicationService.Validators
 {
-    public class BalanceHistoryValidator : AbstractValidator<BalanceHistoryRequestDto>
+    public class BalanceHistoricValidator : AbstractValidator<BalanceHistoricRequestDto>
     {
-        public BalanceHistoryValidator()
+        public BalanceHistoricValidator()
         {
             RuleFor(x => x.Category)
                 .Length(1, 100)

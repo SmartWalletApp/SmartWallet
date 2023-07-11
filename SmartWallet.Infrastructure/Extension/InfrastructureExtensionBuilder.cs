@@ -21,7 +21,7 @@ namespace SmartWallet.Infrastructure.Extension
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<ISmartWalletRepository<Coin>, SmartWalletRepository<Coin>>();
-            services.AddScoped<ISmartWalletRepository<BalanceHistory>, SmartWalletRepository<BalanceHistory>>();
+            services.AddScoped<ISmartWalletRepository<BalanceHistoric>, SmartWalletRepository<BalanceHistoric>>();
             services.AddScoped<ICustomerRepository<Customer>, CustomerRepository>();
             services.AddScoped<ICoinRepository<Coin>, CoinRepository>();
             return services;

@@ -1,6 +1,6 @@
-﻿namespace SmartWallet.ApplicationService.Dto.Response
+﻿namespace SmartWallet.Infrastructure.DataModels
 {
-    public class BalanceHistoryResponseDto
+    public class BalanceHistoric
     {
         public int Id { get; set; }
         public decimal Variation { get; set; }
@@ -8,5 +8,7 @@
         public string Category { get; set; } = string.Empty;
         public DateTime Date { get; set; }
         public string Description { get; set; } = string.Empty;
+        public int WalletId { get; set; }
+        public Wallet Wallet { get; set; } = new Wallet();
     }
 }

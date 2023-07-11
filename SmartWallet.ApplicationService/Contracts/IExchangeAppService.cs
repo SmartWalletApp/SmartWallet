@@ -24,14 +24,16 @@ namespace SmartWallet.ApplicationService.Contracts
 
         string CreateToken(CustomerResponseDto validatedCustomer);
 
-        public Task<CustomerResponseDto> AddWallet(int clientId, string coin);
+        public Task<CustomerResponseDto> AddWallet(int customerId, string coin);
 
         public Task<Coin> AddCoin(string coin);
 
         public Task<IEnumerable<Coin>> GetCoins();
 
-        public Task<CustomerResponseDto> RemoveWallet(int clientId, string coin);
+        public Task<CustomerResponseDto> RemoveWallet(int customerId, string coin);
 
-        public Task<CustomerResponseDto> AddHistoric(int clientId, BalanceHistoryRequestDto historic, string coin);
+        public Task<CustomerResponseDto> AddHistoric(int customerId, BalanceHistoricRequestDto historic, string coin);
+        public Task<Dictionary<string, List<BalanceHistoricResponseDto>>> GetBalanceHistorics(int customerId, string coinName, DateTime minDate, DateTime maxDate);
+        public Task<IEnumerable<WalletResponseDto>> GetWallets(int customerId);
     }
 }

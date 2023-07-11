@@ -11,24 +11,17 @@ namespace SmartWallet.Infrastructure.RepositoryImplementations
         public CustomerRepository(SmartWalletDbContext context, IMapper mapper) : base(context, mapper)
         {
         }
-
         public async Task<Customer> GetByEmail(string email)
         {
             return await EntitySet.FirstOrDefaultAsync(x => x.Email == email) ?? throw new InvalidOperationException("Customer not found");
         }
+
         public override async Task<IEnumerable<Customer>> GetAll() =>
             await EntitySet.Include(c => c.Wallets)
                 .ThenInclude(w => w.Coin)
                 .Include(c => c.Wallets)
-                .ThenInclude(w => w.BalanceHistory)
+                //.ThenInclude(w => w.BalanceHistoric)
                 .ToListAsync();
-
-        public override async Task<Customer> GetByID(int Id) =>
-            await EntitySet.Include(c => c.Wallets)
-                .ThenInclude(w => w.Coin)
-                .Include(c => c.Wallets)
-                .ThenInclude(w => w.BalanceHistory)
-                .FirstOrDefaultAsync(c => c.Id == Id) ?? throw new InvalidOperationException("Customer not found");
 
         public async Task<Customer> UpdateAsync(Customer customer)
         {

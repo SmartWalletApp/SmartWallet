@@ -20,7 +20,7 @@ namespace SmartWallet.Infrastructure.RepositoryImplementations
             await EntitySet.Include(c => c.Wallets)
                 .ThenInclude(w => w.Coin)
                 .Include(c => c.Wallets)
-                //.ThenInclude(w => w.BalanceHistoric)
+                .ThenInclude(w => w.BalanceHistorics)
                 .ToListAsync();
 
         public async Task<Customer> UpdateAsync(Customer customer)

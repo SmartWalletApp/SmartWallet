@@ -105,6 +105,25 @@ namespace SmartWallet.API.Controllers
             }
         }
 
+        [HttpDelete("RemoveHistoric/{coin}/{historicId}", Name = "RemoveHistoric")]
+        public async Task<IActionResult> RemoveHistoric(int historicId, string coin)
+        {
+            try
+            {
+                if (Request.Headers.TryGetValue("Authorization", out var jwtToken))
+                {
+                    var claims = _appService.GetTokenClaims(jwtToken!);
+                    var customerId = int.Parse(claims["id"]);
+                    return Ok(await _appService.RemoveHistoric(customerId, historicId, coin));
+                }
+                return Unauthorized();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         [HttpPost("AddHistoric/{coin}", Name = "AddHistoric")]
         public async Task<IActionResult> AddHistoric([FromBody] BalanceHistoricRequestDto historic, string coin)
         {

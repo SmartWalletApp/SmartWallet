@@ -63,6 +63,29 @@ namespace SmartWallet.ApplicationService.Services
             return result;
         }
 
+        public async Task<CustomerResponseDto> RemoveHistoric(int customerId, int historicId, string coin)
+        {
+            var customerFound = await ((UnitOfWork)_unitOfWork).CustomerRepository.GetByID(customerId) ?? throw new Exception("Customer does not exist");
+
+            var walletFound = customerFound.Wallets.Find(x => x.Coin.Name == coin) ?? throw new Exception("Wallet with that coin does not exist");
+
+            var historicToDelete = walletFound.BalanceHistorics.FirstOrDefault(h => h.Id == historicId) ?? throw new Exception("BalanceHistoric with that id does not exist");
+
+            walletFound.BalanceHistorics.Remove(historicToDelete);
+
+            if (historicToDelete.IsIncome)
+                walletFound.Balance -= historicToDelete.Variation;
+            else
+                walletFound.Balance += historicToDelete.Variation;
+
+            _unitOfWork.Save();
+
+            var customerFoundResponseEntity = _mapper.Map<CustomerResponseEntity>(customerFound);
+            var customerFoundResponseDto = _mapper.Map<CustomerResponseDto>(customerFoundResponseEntity);
+
+            return customerFoundResponseDto;
+        }
+
         public async Task<CustomerResponseDto> AddHistoric(int customerId, BalanceHistoricRequestDto historic, string coin)
         {
             var validationResult = _BalanceHistoricValidator.Validate(historic);
@@ -77,6 +100,12 @@ namespace SmartWallet.ApplicationService.Services
             var newHistoric = _mapper.Map<BalanceHistoric>(newHistoricRequestEntity);
 
             walletFound.BalanceHistorics.Add(newHistoric);
+
+            if (newHistoric.IsIncome)
+                walletFound.Balance += newHistoric.Variation;
+            else
+                walletFound.Balance -= newHistoric.Variation;
+
             _unitOfWork.Save();
 
             var customerFoundResponseEntity = _mapper.Map<CustomerResponseEntity>(customerFound);

@@ -34,5 +34,7 @@ namespace SmartWallet.ApplicationService.Contracts
         public Task<CustomerResponseDto> AddHistoric(int customerId, BalanceHistoricRequestDto historic, string coin);
 
         public Task<Dictionary<string, KeyValuePair<decimal, List<BalanceHistoricResponseDto>>>> GetBalanceHistorics(int customerId, string coinName, DateTime minDate, DateTime maxDate);
+
+        public Task<CustomerResponseDto> RemoveHistoric(int customerId, int historicId, string coin);
     }
 }

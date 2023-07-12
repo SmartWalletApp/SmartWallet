@@ -1,10 +1,7 @@
-﻿
-using SmartWallet.DomainModel.RepositoryContracts;
+﻿using SmartWallet.DomainModel.RepositoryContracts;
 using SmartWallet.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using AutoMapper;
-using SmartWallet.Infrastructure.DataModels;
-using Microsoft.Identity.Client;
 
 namespace SmartWallet.Infrastructure.RepositoryImplementations
 {
@@ -19,16 +16,6 @@ namespace SmartWallet.Infrastructure.RepositoryImplementations
             _context = context;
             EntitySet = _context.Set<T>();
             _mapper = mapper;
-        }
-
-        public virtual async Task<IEnumerable<T>> GetAll()
-        {
-            return await EntitySet.ToListAsync();
-        }
-
-        public virtual async Task<T> GetByID(int Id)
-        {
-            return await EntitySet.FindAsync(Id) ?? throw new InvalidOperationException($"{typeof(T)} not found");
         }
 
         public virtual async Task<T> Insert(T entity)
@@ -46,12 +33,6 @@ namespace SmartWallet.Infrastructure.RepositoryImplementations
                 return entryRemoved.Entity;
             }
             throw new InvalidOperationException();
-        }
-
-        public virtual T Update(T entity)
-        {
-            var entryUpdated = EntitySet.Update(entity);
-            return entryUpdated.Entity;
         }
 
         public void Dispose()

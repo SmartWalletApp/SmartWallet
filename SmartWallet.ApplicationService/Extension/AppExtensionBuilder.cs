@@ -25,7 +25,7 @@ namespace SmartWallet.ApplicationService.Extension
             services.AddFluentValidationAutoValidation();
             services.AddScoped<IValidator<CustomerRequestDto>, CustomerValidator>();
             services.AddScoped<IValidator<CoinRequestDto>, CoinValidator>();
-            services.AddScoped<IValidator<BalanceHistoryRequestDto>, BalanceHistoryValidator>();
+            services.AddScoped<IValidator<BalanceHistoricRequestDto>, BalanceHistoricValidator>();
 
             services.AddSingleton<IJwtProperties>(jwtProperties);
             services.AddAuthentication(opt =>

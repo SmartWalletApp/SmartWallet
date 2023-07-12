@@ -9,15 +9,21 @@ namespace SmartWallet.Infrastructure.Persistence
 
         public ICustomerRepository<Customer> CustomerRepository { get; }
         public ICoinRepository<Coin> CoinRepository { get; }
+        public IWalletRepository<Wallet> WalletRepository { get; }
+        public IBalanceHistoric<BalanceHistoric> BalanceHistoricRepository { get; }
 
         public UnitOfWork(
             SmartWalletDbContext context,
             ICustomerRepository<Customer> customerRepository,
-            ICoinRepository<Coin> coinRepository)
+            ICoinRepository<Coin> coinRepository,
+            IWalletRepository<Wallet> walletRepository,
+            IBalanceHistoric<BalanceHistoric> balanceHistoricRepository)
         {
             _context = context;
             CustomerRepository = customerRepository;
             CoinRepository = coinRepository;
+            WalletRepository = walletRepository;
+            BalanceHistoricRepository = balanceHistoricRepository;
         }
 
         public void Save()

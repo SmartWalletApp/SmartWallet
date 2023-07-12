@@ -5,6 +5,6 @@
         public int Id { get; set; }
         public decimal Balance { get; set; }
         public CoinResponseEntity Coin { get; set; } = new CoinResponseEntity();
-        public List<BalanceHistoryResponseEntity> BalanceHistory { get; set; } = new List<BalanceHistoryResponseEntity>();
+        public List<BalanceHistoricResponseEntity> BalanceHistorics { get; set; } = new List<BalanceHistoricResponseEntity>();
     }
 }

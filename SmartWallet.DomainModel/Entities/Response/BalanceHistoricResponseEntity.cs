@@ -1,7 +1,8 @@
-﻿namespace SmartWallet.DomainModel.Dto.Request
+﻿namespace SmartWallet.DomainModel.Entities.Response
 {
-    public class BalanceHistoryRequestEntity
+    public class BalanceHistoricResponseEntity
     {
+        public int Id { get; set; }
         public decimal Variation { get; set; }
         public bool IsIncome { get; set; }
         public string Category { get; set; } = string.Empty;

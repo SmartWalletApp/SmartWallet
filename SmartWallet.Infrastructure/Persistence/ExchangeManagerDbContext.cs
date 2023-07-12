@@ -18,7 +18,7 @@ namespace SmartWallet.Infrastructure.Persistence
             {
                 entity.HasKey(w => w.Id);
                 entity.Property(w => w.Id).ValueGeneratedOnAdd();
-                entity.Property(w => w.Balance).HasDefaultValue(0m);
+                entity.Property(w => w.Balance).HasPrecision(20, 5).HasDefaultValue(0m);
                 entity.Property(w => w.CoinId).IsRequired();
                 entity.Property(w => w.CustomerId).IsRequired();
 
@@ -27,7 +27,7 @@ namespace SmartWallet.Infrastructure.Persistence
                       .HasForeignKey(w => w.CoinId)
                       .OnDelete(DeleteBehavior.Restrict);
 
-                entity.HasMany(w => w.BalanceHistory)
+                entity.HasMany(w => w.BalanceHistorics)
                       .WithOne()
                       .HasForeignKey(bh => bh.WalletId)
                       .OnDelete(DeleteBehavior.Cascade);
@@ -35,19 +35,19 @@ namespace SmartWallet.Infrastructure.Persistence
                 entity.HasIndex(w => new { w.CustomerId, w.CoinId }).IsUnique();
             });
 
-            modelBuilder.Entity<BalanceHistory>(entity =>
+            modelBuilder.Entity<BalanceHistoric>(entity =>
             {
                 entity.HasKey(b => b.Id);
                 entity.Property(b => b.Id).ValueGeneratedOnAdd();
-                entity.Property(b => b.Variation).IsRequired();
+                entity.Property(b => b.Variation).HasPrecision(20, 5).IsRequired();
                 entity.Property(b => b.IsIncome).IsRequired();
                 entity.Property(b => b.Category).IsRequired();
-                entity.Property(b => b.Date).HasDefaultValue(DateTime.Now);
+                entity.Property(b => b.Date).HasDefaultValueSql("CURRENT_TIMESTAMP");
                 entity.Property(b => b.Description).IsRequired();
                 entity.Property(b => b.WalletId).IsRequired();
 
                 entity.HasOne(b => b.Wallet)
-                      .WithMany(w => w.BalanceHistory)
+                      .WithMany(w => w.BalanceHistorics)
                       .HasForeignKey(b => b.WalletId)
                       .OnDelete(DeleteBehavior.Cascade);
             });
@@ -57,8 +57,8 @@ namespace SmartWallet.Infrastructure.Persistence
                 entity.HasKey(c => c.Id);
                 entity.Property(c => c.Id).ValueGeneratedOnAdd();
                 entity.Property(c => c.Name).IsRequired();
-                entity.Property(c => c.BuyValue).IsRequired();
-                entity.Property(c => c.SellValue).IsRequired();
+                entity.Property(c => c.BuyValue).HasPrecision(20, 5).IsRequired();
+                entity.Property(c => c.SellValue).HasPrecision(20, 5).IsRequired();
 
                 entity.HasIndex(c => c.Name).IsUnique();
             });
@@ -71,9 +71,9 @@ namespace SmartWallet.Infrastructure.Persistence
                 entity.Property(c => c.Surname).IsRequired();
                 entity.Property(c => c.Email).IsRequired();
                 entity.Property(c => c.Password).IsRequired();
-                entity.Property(c => c.IsActive).HasDefaultValue(true);
-                entity.Property(c => c.CreationDate).HasDefaultValue(DateTime.Now);
-                entity.Property(c => c.SecurityGroup).HasDefaultValue("user");
+                entity.Property(c => c.IsActive).IsRequired();
+                entity.Property(c => c.CreationDate).HasDefaultValueSql("CURRENT_TIMESTAMP");
+                entity.Property(c => c.SecurityGroup).IsRequired();
 
                 entity.HasIndex(c => c.Email).IsUnique();
 

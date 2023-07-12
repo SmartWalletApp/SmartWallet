@@ -43,8 +43,27 @@ namespace SmartWallet.API.Controllers
                 if (Request.Headers.TryGetValue("Authorization", out var jwtToken))
                 {
                     var claims = _appService.GetTokenClaims(jwtToken!);
-                    int clientId = int.Parse(claims["id"]);
-                    return Ok(await _appService.GetCustomerById(clientId));
+                    var customerId = int.Parse(claims["id"]);
+                    return Ok(await _appService.GetCustomerById(customerId));
+                }
+                return Unauthorized();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("GetBalanceHistorics/{coin}", Name = "GetBalanceHistorics")]
+        public async Task<IActionResult> GetBalanceHistorics(string coin, [FromQuery]DateTime since, [FromQuery]DateTime until)
+        {
+            try
+            {
+                if (Request.Headers.TryGetValue("Authorization", out var jwtToken))
+                {
+                    var claims = _appService.GetTokenClaims(jwtToken!);
+                    var customerId = int.Parse(claims["id"]);
+                    return Ok(await _appService.GetBalanceHistorics(customerId, coin, since, until));
                 }
                 return Unauthorized();
             }
@@ -55,7 +74,7 @@ namespace SmartWallet.API.Controllers
         }
 
         [HttpPost("CreateCustomer", Name = "CreateCustomer")]
-        public async Task<ActionResult<Customer>> CreateCustomer(CustomerRequestDto customer)
+        public async Task<IActionResult> CreateCustomer(CustomerRequestDto customer)
         {
             try
             {
@@ -68,15 +87,15 @@ namespace SmartWallet.API.Controllers
         }
 
         [HttpPost("AddWallet/{coin}", Name = "AddWallet")]
-        public async Task<ActionResult<Customer>> AddWallet(string coin)
+        public async Task<IActionResult> AddWallet(string coin)
         {
             try
             {
                 if (Request.Headers.TryGetValue("Authorization", out var jwtToken))
                 {
                     var claims = _appService.GetTokenClaims(jwtToken!);
-                    int clientId = int.Parse(claims["id"]);
-                    return Ok(await _appService.AddWallet(clientId, coin));
+                    var customerId = int.Parse(claims["id"]);
+                    return Ok(await _appService.AddWallet(customerId, coin));
                 }
                 return Unauthorized();
             }
@@ -87,15 +106,15 @@ namespace SmartWallet.API.Controllers
         }
 
         [HttpPost("AddHistoric/{coin}", Name = "AddHistoric")]
-        public async Task<ActionResult<Customer>> AddHistoric([FromBody] BalanceHistoryRequestDto historic, string coin)
+        public async Task<IActionResult> AddHistoric([FromBody] BalanceHistoricRequestDto historic, string coin)
         {
             try
             {
                 if (Request.Headers.TryGetValue("Authorization", out var jwtToken))
                 {
                     var claims = _appService.GetTokenClaims(jwtToken!);
-                    int clientId = int.Parse(claims["id"]);
-                    return Ok(await _appService.AddHistoric(clientId, historic, coin));
+                    var customerId = int.Parse(claims["id"]);
+                    return Ok(await _appService.AddHistoric(customerId, historic, coin));
                 }
                 return Unauthorized();
             }
@@ -106,15 +125,15 @@ namespace SmartWallet.API.Controllers
         }
 
         [HttpDelete("RemoveWallet/{coin}", Name = "RemoveWallet")]
-        public async Task<ActionResult<Customer>> RemoveWallet(string coin)
+        public async Task<IActionResult> RemoveWallet(string coin)
         {
             try
             {
                 if (Request.Headers.TryGetValue("Authorization", out var jwtToken))
                 {
                     var claims = _appService.GetTokenClaims(jwtToken!);
-                    int clientId = int.Parse(claims["id"]);
-                    return Ok(await _appService.RemoveWallet(clientId, coin));
+                    var customerId = int.Parse(claims["id"]);
+                    return Ok(await _appService.RemoveWallet(customerId, coin));
                 }
                 return Unauthorized();
             }

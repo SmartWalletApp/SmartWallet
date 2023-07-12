@@ -1,6 +1,6 @@
 ﻿namespace SmartWallet.ApplicationService.Dto.Request
 {
-    public class BalanceHistoryRequestDto
+    public class BalanceHistoricRequestDto
     {
         public decimal Variation { get; set; }
         public bool IsIncome { get; set; }

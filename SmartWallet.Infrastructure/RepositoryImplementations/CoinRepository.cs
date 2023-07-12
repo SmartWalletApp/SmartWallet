@@ -12,6 +12,10 @@ namespace SmartWallet.Infrastructure.RepositoryImplementations
         {
         }
 
+        public async Task<IEnumerable<Coin>> GetAll()
+        {
+            return await EntitySet.ToListAsync();
+        }
         public async Task<Coin> GetByName(string name)
         {
             return await EntitySet.FirstOrDefaultAsync(x => x.Name == name) ?? throw new InvalidOperationException("Customer not found");

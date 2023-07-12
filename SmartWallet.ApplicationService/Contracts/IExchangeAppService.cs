@@ -6,7 +6,6 @@ namespace SmartWallet.ApplicationService.Contracts
 {
     public interface ISmartWalletAppService
     {
-        public Task<IEnumerable<CustomerResponseDto>> GetCustomers();
 
         public Task<CustomerResponseDto> GetCustomerById(int id);
 
@@ -33,7 +32,7 @@ namespace SmartWallet.ApplicationService.Contracts
         public Task<CustomerResponseDto> RemoveWallet(int customerId, string coin);
 
         public Task<CustomerResponseDto> AddHistoric(int customerId, BalanceHistoricRequestDto historic, string coin);
-        public Task<Dictionary<string, List<BalanceHistoricResponseDto>>> GetBalanceHistorics(int customerId, string coinName, DateTime minDate, DateTime maxDate);
-        public Task<IEnumerable<WalletResponseDto>> GetWallets(int customerId);
+
+        public Task<Dictionary<string, KeyValuePair<decimal, List<BalanceHistoricResponseDto>>>> GetBalanceHistorics(int customerId, string coinName, DateTime minDate, DateTime maxDate);
     }
 }

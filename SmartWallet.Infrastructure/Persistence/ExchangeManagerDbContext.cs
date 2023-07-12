@@ -42,7 +42,7 @@ namespace SmartWallet.Infrastructure.Persistence
                 entity.Property(b => b.Variation).HasPrecision(20, 5).IsRequired();
                 entity.Property(b => b.IsIncome).IsRequired();
                 entity.Property(b => b.Category).IsRequired();
-                entity.Property(b => b.Date).HasDefaultValue(DateTime.Now);
+                entity.Property(b => b.Date).HasDefaultValueSql("CURRENT_TIMESTAMP");
                 entity.Property(b => b.Description).IsRequired();
                 entity.Property(b => b.WalletId).IsRequired();
 
@@ -72,8 +72,8 @@ namespace SmartWallet.Infrastructure.Persistence
                 entity.Property(c => c.Email).IsRequired();
                 entity.Property(c => c.Password).IsRequired();
                 entity.Property(c => c.IsActive).IsRequired();
-                entity.Property(c => c.CreationDate).HasDefaultValue(DateTime.Now);
-                entity.Property(c => c.SecurityGroup).HasDefaultValue("user");
+                entity.Property(c => c.CreationDate).HasDefaultValueSql("CURRENT_TIMESTAMP");
+                entity.Property(c => c.SecurityGroup).IsRequired();
 
                 entity.HasIndex(c => c.Email).IsUnique();
 

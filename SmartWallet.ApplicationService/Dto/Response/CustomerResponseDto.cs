@@ -12,6 +12,6 @@ namespace SmartWallet.ApplicationService.Dto.Response
         public bool IsActive { get; set; }
         public DateTime CreationDate { get; set; }
         public string SecurityGroup { get; set; } = string.Empty;
-        //public List<WalletResponseEntity> Wallets { get; set; } = new List<WalletResponseEntity>();
+        public List<WalletResponseEntity> Wallets { get; set; } = new List<WalletResponseEntity>();
     }
 }

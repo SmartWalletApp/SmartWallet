@@ -54,27 +54,8 @@ namespace SmartWallet.API.Controllers
             }
         }
 
-        [HttpGet("GetMyWallets", Name = "GetMyWallets")]
-        public async Task<IActionResult> GetMyWallets()
-        {
-            try
-            {
-                if (Request.Headers.TryGetValue("Authorization", out var jwtToken))
-                {
-                    var claims = _appService.GetTokenClaims(jwtToken!);
-                    var customerId = int.Parse(claims["id"]);
-                    return Ok(await _appService.GetWallets(customerId));
-                }
-                return Unauthorized();
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-
-        [HttpGet("GetHistorics", Name = "GetHistorics")]
-        public async Task<IActionResult> GetHistorics([FromBody] string coin, [FromBody] DateTime since, [FromBody] DateTime until)
+        [HttpGet("GetBalanceHistorics/{coin}", Name = "GetBalanceHistorics")]
+        public async Task<IActionResult> GetBalanceHistorics(string coin, [FromQuery]DateTime since, [FromQuery]DateTime until)
         {
             try
             {
@@ -93,7 +74,7 @@ namespace SmartWallet.API.Controllers
         }
 
         [HttpPost("CreateCustomer", Name = "CreateCustomer")]
-        public async Task<ActionResult<Customer>> CreateCustomer(CustomerRequestDto customer)
+        public async Task<IActionResult> CreateCustomer(CustomerRequestDto customer)
         {
             try
             {
@@ -106,7 +87,7 @@ namespace SmartWallet.API.Controllers
         }
 
         [HttpPost("AddWallet/{coin}", Name = "AddWallet")]
-        public async Task<ActionResult<Customer>> AddWallet(string coin)
+        public async Task<IActionResult> AddWallet(string coin)
         {
             try
             {
@@ -125,7 +106,7 @@ namespace SmartWallet.API.Controllers
         }
 
         [HttpPost("AddHistoric/{coin}", Name = "AddHistoric")]
-        public async Task<ActionResult<Customer>> AddHistoric([FromBody] BalanceHistoricRequestDto historic, string coin)
+        public async Task<IActionResult> AddHistoric([FromBody] BalanceHistoricRequestDto historic, string coin)
         {
             try
             {
@@ -144,7 +125,7 @@ namespace SmartWallet.API.Controllers
         }
 
         [HttpDelete("RemoveWallet/{coin}", Name = "RemoveWallet")]
-        public async Task<ActionResult<Customer>> RemoveWallet(string coin)
+        public async Task<IActionResult> RemoveWallet(string coin)
         {
             try
             {

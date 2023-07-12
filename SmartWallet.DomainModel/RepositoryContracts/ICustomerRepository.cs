@@ -4,7 +4,8 @@ namespace SmartWallet.DomainModel.RepositoryContracts
 {
     public interface ICustomerRepository<T> : ISmartWalletRepository<T> where T : class
     {
-        public Task<T> UpdateAsync(T t);
         public Task<T> GetByEmail(string email);
+        public Task<T> GetByID(int Id);
+        public Task<T> UpdateAsync(T t);
     }
 }

@@ -3,16 +3,16 @@ using SmartWallet.Infrastructure.DataModels;
 using SmartWallet.DomainModel.RepositoryContracts;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
-using SmartWallet.ApplicationService.JWT.Contracts;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using SmartWallet.ApplicationService.Dto.Response;
 using AutoMapper;
 using SmartWallet.ApplicationService.Dto.Request;
 using SmartWallet.DomainModel.Dto.Request;
 using SmartWallet.DomainModel.Entities.Response;
-using FluentValidation;
 using SmartWallet.Infrastructure.Persistence;
+using SmartWallet.ApplicationService.JWT.Contracts;
+using FluentValidation;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace SmartWallet.ApplicationService.Services
 {
@@ -42,27 +42,26 @@ namespace SmartWallet.ApplicationService.Services
             _BalanceHistoricValidator = BalanceHistoricValidator;
         }
 
-        public async Task<Dictionary<string, List<BalanceHistoricResponseDto>>> GetBalanceHistorics(int customerId, string coinName, DateTime minDate, DateTime maxDate)
+        public async Task<Dictionary<string, KeyValuePair<decimal, List<BalanceHistoricResponseDto>>>> GetBalanceHistorics(int customerId, string coinName, DateTime minDate, DateTime maxDate)
         {
-            var balanceHistorics =
-                await ((UnitOfWork)_unitOfWork).WalletRepository.GetBalanceHistorics(customerId, coinName, minDate, maxDate) ?? throw new Exception("Customer or coin does not exist");
-
-            var result = new Dictionary<string, List<BalanceHistoricResponseDto>>();
-
-            foreach (var entry in balanceHistorics)
+            if (minDate == default || maxDate == default)
             {
-                result[entry.Key] = _mapper.Map<List<BalanceHistoricResponseDto>>(entry.Value);
+                minDate = DateTime.Now.AddDays(-7);
+                maxDate = DateTime.Now.AddDays(1);
             }
+
+            var balanceHistorics = await ((UnitOfWork)_unitOfWork).WalletRepository.GetBalanceHistorics(customerId, coinName, minDate, maxDate) ?? throw new Exception("Customer or coin does not exist");
+
+            var result = balanceHistorics.ToDictionary(
+                bh => bh.Key,
+                bh => new KeyValuePair<decimal, List<BalanceHistoricResponseDto>>(
+                    bh.Value.Key,
+                    bh.Value.Value.Select(_mapper.Map<BalanceHistoricResponseDto>).ToList()
+                )
+            );
 
             return result;
         }
-
-        public async Task<IEnumerable<WalletResponseDto>> GetWallets(int customerId)
-        {
-            var wallets = await ((UnitOfWork)_unitOfWork).WalletRepository.GetWallets(customerId) ?? throw new Exception("Customer does not exist");
-            return _mapper.Map<IEnumerable<WalletResponseDto>>(wallets);
-        }
-
 
         public async Task<CustomerResponseDto> AddHistoric(int customerId, BalanceHistoricRequestDto historic, string coin)
         {
@@ -119,15 +118,6 @@ namespace SmartWallet.ApplicationService.Services
             {
                 throw new Exception("Wrong user or password");
             }
-        }
-
-        public async Task<IEnumerable<CustomerResponseDto>> GetCustomers()
-        {
-            var customers = await ((UnitOfWork)_unitOfWork).CustomerRepository.GetAll();
-            if (!customers.Any()) throw new Exception("No customers found");
-
-            var customerResponseEntities = customers.Select(customer => _mapper.Map<CustomerResponseEntity>(customer));
-            return customerResponseEntities.Select(customerResponseEntity => _mapper.Map<CustomerResponseDto>(customerResponseEntity));
         }
 
         public async Task<CustomerResponseDto> GetCustomerById(int id)

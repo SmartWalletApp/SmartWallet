@@ -38,27 +38,6 @@ namespace SmartWallet.API.Controllers
             }
         }
 
-        [HttpGet("GetCustomers", Name = "GetCustomers")]
-        public async Task<IActionResult> GetCustomers()
-        {
-            try
-            {
-                if (Request.Headers.TryGetValue("Authorization", out var jwtToken))
-                {
-                    var claims = _appService.GetTokenClaims(jwtToken!);
-                    if (claims["group"] == "admin")
-                    {
-                        return Ok(await _appService.GetCustomers());
-                    }
-                }
-                return Unauthorized();
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-
         [HttpGet("GetCustomer/{id}", Name = "GetCustomer")]
         public async Task<IActionResult> GetCustomer(int id)
         {

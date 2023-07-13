@@ -166,25 +166,14 @@ namespace SmartWallet.ApplicationService.Services
             // Currently bcrypt will use Cost 11 (2048 iteratios) by default, which is around 140ms in debug using a Ryzen 5 3600X and DDR4 3200MHz RAM.
             newCustomer.Password = HashPassword(newCustomer.Password);
 
-            var coins = await ((UnitOfWork)_unitOfWork).CoinRepository.GetAll();
-
             var newCustomerEntity = _mapper.Map<CustomerRequestEntity>(newCustomer);
             var customer = _mapper.Map<Customer>(newCustomerEntity);
 
             customer.Wallets = new List<Wallet>();
 
-            foreach (var coin in coins)
-            {
-                var wallet = new Wallet
-                {
-                    Balance = 0,
-                    Coin = coin,
-                    BalanceHistorics = new List<BalanceHistoric>()
-                };
-                customer.Wallets.Add(wallet);
-            }
             var customerInserted = await ((UnitOfWork)_unitOfWork).CustomerRepository.Insert(customer) ?? throw new Exception("Failed to insert customer");
             _unitOfWork.Save();
+
             var customerInsertedResponseEntity = _mapper.Map<CustomerResponseEntity>(customerInserted);
             var customerInsertedResponseDto = _mapper.Map<CustomerResponseDto>(customerInsertedResponseEntity);
             return customerInsertedResponseDto;

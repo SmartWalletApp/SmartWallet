@@ -21,12 +21,27 @@ namespace SmartWallet.API.StartUpConfigurations
             Builder.Services.AddEndpointsApiExplorer();
             Builder.Services.AddSwaggerGen();
 
-            // Prevent Kestrel from adding a Server header
             Builder.Services.Configure<KestrelServerOptions>(options =>
             {
                 options.AddServerHeader = false;
             });
 
+            BuildSwaggerAuth();
+
+            #if DEBUG
+            var connectionString = Builder.Configuration.GetConnectionString("MSSQL")!;
+            #else
+            var connectionString = Builder.Configuration.GetConnectionString("MySQL")!;
+            #endif
+
+            Builder.Services.AddApplicationServices(connectionString);
+            Builder.Services.AddControllers();
+
+            return Builder;
+        }
+
+        private void BuildSwaggerAuth()
+        {
             Builder.Services.AddSwaggerGen(c =>
             {
                 c.AddSecurityDefinition("JWTAuth", new OpenApiSecurityScheme
@@ -53,19 +68,6 @@ namespace SmartWallet.API.StartUpConfigurations
                     }
                 });
             });
-
-
-            #if DEBUG
-            var connectionString = Builder.Configuration.GetConnectionString("MSSQL");
-            #else
-            var connectionString = Builder.Configuration.GetConnectionString("MySQL");
-            #endif
-
-            Builder.Services.AddApplicationServices(connectionString!);
-
-            Builder.Services.AddControllers();
-
-            return Builder;
         }
     }
 }

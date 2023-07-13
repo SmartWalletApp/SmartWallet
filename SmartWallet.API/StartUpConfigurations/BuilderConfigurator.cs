@@ -1,0 +1,73 @@
+﻿using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.OpenApi.Models;
+using SmartWallet.ApplicationService.Extension;
+
+namespace SmartWallet.API.StartUpConfigurations
+{
+    public class BuilderConfigurator
+    {
+        public WebApplicationBuilder Builder;
+
+        public BuilderConfigurator(string[] args)
+        {
+            Builder = SetBuilder(args);
+        }
+
+        private WebApplicationBuilder SetBuilder(string[] args)
+        {
+            Builder = WebApplication.CreateBuilder(args);
+
+            Builder.Services.AddControllers();
+            Builder.Services.AddEndpointsApiExplorer();
+            Builder.Services.AddSwaggerGen();
+
+            Builder.Services.Configure<KestrelServerOptions>(options =>
+            {
+                options.AddServerHeader = false;
+            });
+
+            BuildSwaggerAuth();
+
+            #if DEBUG
+            var connectionString = Builder.Configuration.GetConnectionString("MSSQL")!;
+            #else
+            var connectionString = Builder.Configuration.GetConnectionString("MySQL")!;
+            #endif
+
+            Builder.Services.AddApplicationServices(connectionString);
+            Builder.Services.AddControllers();
+
+            return Builder;
+        }
+
+        private void BuildSwaggerAuth()
+        {
+            Builder.Services.AddSwaggerGen(c =>
+            {
+                c.AddSecurityDefinition("JWTAuth", new OpenApiSecurityScheme
+                {
+                    Description = "JWT Authorization header. Enter your token in the text input below.",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "JWT"
+                });
+
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "JWTAuth"
+                            }
+                        },
+                        Array.Empty<string>()
+                    }
+                });
+            });
+        }
+    }
+}

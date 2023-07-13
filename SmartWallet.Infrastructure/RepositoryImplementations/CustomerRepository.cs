@@ -12,24 +12,50 @@ namespace SmartWallet.Infrastructure.RepositoryImplementations
         {
         }
 
-        public async Task<Customer> GetByEmail(string email) =>
-            await EntitySet
+        public async Task<Customer> GetByEmail(string email, bool GetBalanceHistorics = false)
+        {
+            if (GetBalanceHistorics)
+            {
+                return await EntitySet
                 .Where(c => c.Email == email)
                 .Include(c => c.Wallets)
                     .ThenInclude(w => w.Coin)
                 .Include(c => c.Wallets)
                     .ThenInclude(w => w.BalanceHistorics)
                 .FirstOrDefaultAsync() ?? throw new InvalidOperationException($"Customer not found");
+            }
+            else
+            {
+                return await EntitySet
+                .Where(c => c.Email == email)
+                .Include(c => c.Wallets)
+                    .ThenInclude(w => w.Coin)
+                .FirstOrDefaultAsync() ?? throw new InvalidOperationException($"Customer not found");
+            }
+        }
 
-        public async Task<Customer> GetByID(int Id) =>
-            await EntitySet
+        public async Task<Customer> GetByID(int Id, bool GetBalanceHistorics = false)
+        {
+            if (GetBalanceHistorics)
+            {
+                return await EntitySet
                 .Where(c => c.Id == Id)
                 .Include(c => c.Wallets)
                     .ThenInclude(w => w.Coin)
                 .Include(c => c.Wallets)
                     .ThenInclude(w => w.BalanceHistorics)
                 .FirstOrDefaultAsync() ?? throw new InvalidOperationException($"Customer not found");
-
+            }
+            else
+            {
+                return await EntitySet
+                .Where(c => c.Id == Id)
+                .Include(c => c.Wallets)
+                    .ThenInclude(w => w.Coin)
+                .FirstOrDefaultAsync() ?? throw new InvalidOperationException($"Customer not found");
+            }
+        }
+            
 
         public async Task<Customer> UpdateAsync(Customer customer)
         {

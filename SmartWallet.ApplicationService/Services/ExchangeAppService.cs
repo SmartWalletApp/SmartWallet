@@ -65,7 +65,7 @@ namespace SmartWallet.ApplicationService.Services
 
         public async Task<CustomerResponseDto> RemoveHistoric(int customerId, int historicId, string coin)
         {
-            var customerFound = await ((UnitOfWork)_unitOfWork).CustomerRepository.GetByID(customerId) ?? throw new Exception("Customer does not exist");
+            var customerFound = await ((UnitOfWork)_unitOfWork).CustomerRepository.GetByID(customerId, true) ?? throw new Exception("Customer does not exist");
 
             var walletFound = customerFound.Wallets.Find(x => x.Coin.Name == coin) ?? throw new Exception("Wallet with that coin does not exist");
 
@@ -92,7 +92,7 @@ namespace SmartWallet.ApplicationService.Services
 
             if (!validationResult.IsValid) throw new FormatException(string.Join("\n", validationResult.Errors.Select(x => x.ErrorMessage)));
 
-            var customerFound = await ((UnitOfWork)_unitOfWork).CustomerRepository.GetByID(customerId) ?? throw new Exception("Customer does not exist");
+            var customerFound = await ((UnitOfWork)_unitOfWork).CustomerRepository.GetByID(customerId, true) ?? throw new Exception("Customer does not exist");
 
             var walletFound = customerFound.Wallets.Find(x => x.Coin.Name == coin) ?? throw new Exception("Wallet with that coin does not exist");
 

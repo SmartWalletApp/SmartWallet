@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using AutoMapper;
 using SmartWallet.DomainModel.RepositoryContracts;
 using SmartWallet.DomainModel.Entities.Response;
-using Castle.Core.Resource;
 
 namespace SmartWallet.Infrastructure.RepositoryImplementations
 {
@@ -16,6 +15,7 @@ namespace SmartWallet.Infrastructure.RepositoryImplementations
 
         public async Task<Dictionary<string, KeyValuePair<decimal, List<BalanceHistoricResponseEntity>>>> GetBalanceHistorics(int customerId, string coinName, DateTime minDate, DateTime maxDate)
         {
+
             var balanceHistorics = await EntitySet
                 .Where(w => w.CustomerId == customerId && w.Coin.Name == coinName)
                 .Include(w => w.Coin)
@@ -35,10 +35,11 @@ namespace SmartWallet.Infrastructure.RepositoryImplementations
                         g.ToList())
                 })
                 .ToDictionary(g => g.Category, g => g.BalanceHistorics);
+
+
             return mappedBalanceHistorics;
+
         }
-
-
 
 
     }

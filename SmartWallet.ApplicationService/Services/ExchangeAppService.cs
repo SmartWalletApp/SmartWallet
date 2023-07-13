@@ -42,7 +42,7 @@ namespace SmartWallet.ApplicationService.Services
             _BalanceHistoricValidator = BalanceHistoricValidator;
         }
 
-        public async Task<Dictionary<string, KeyValuePair<decimal, List<BalanceHistoricResponseDto>>>> GetBalanceHistorics(int customerId, string coinName, DateTime minDate, DateTime maxDate)
+        public async Task<Dictionary<string, BalanceHistoricCategoryEntity<decimal, List<BalanceHistoricResponseDto>>>> GetBalanceHistorics(int customerId, string coinName, DateTime minDate, DateTime maxDate)
         {
             if (minDate == default || maxDate == default)
             {
@@ -54,9 +54,9 @@ namespace SmartWallet.ApplicationService.Services
 
             var result = balanceHistorics.ToDictionary(
                 bh => bh.Key,
-                bh => new KeyValuePair<decimal, List<BalanceHistoricResponseDto>>(
-                    bh.Value.Key,
-                    bh.Value.Value.Select(_mapper.Map<BalanceHistoricResponseDto>).ToList()
+                bh => new BalanceHistoricCategoryEntity<decimal, List<BalanceHistoricResponseDto>>(
+                    bh.Value.Total,
+                    bh.Value.BalanceHistorics.Select(_mapper.Map<BalanceHistoricResponseDto>).ToList()
                 )
             );
 

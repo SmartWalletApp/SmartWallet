@@ -13,7 +13,7 @@ namespace SmartWallet.Infrastructure.RepositoryImplementations
         {
         }
 
-        public async Task<Dictionary<string, KeyValuePair<decimal, List<BalanceHistoricResponseEntity>>>> GetBalanceHistorics(int customerId, string coinName, DateTime minDate, DateTime maxDate)
+        public async Task<Dictionary<string, BalanceHistoricCategoryEntity<decimal, List<BalanceHistoricResponseEntity>>>> GetBalanceHistorics(int customerId, string coinName, DateTime minDate, DateTime maxDate)
         {
 
             var balanceHistorics = await EntitySet
@@ -30,7 +30,7 @@ namespace SmartWallet.Infrastructure.RepositoryImplementations
                 .Select(g => new
                 {
                     Category = g.Key,
-                    BalanceHistorics = new KeyValuePair<decimal, List<BalanceHistoricResponseEntity>>(
+                    BalanceHistorics = new BalanceHistoricCategoryEntity<decimal, List<BalanceHistoricResponseEntity>>(
                         g.Sum(bh => bh.IsIncome ? bh.Variation : -bh.Variation),
                         g.ToList())
                 })
